@@ -1,122 +1,96 @@
-import { useState } from 'react'
-import heroImg from './assets/hero.png'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import './App.css'
+import { useState } from "react";
+import { MoreHorizontal, Trash2, Pencil } from "lucide-react";
+import Button from "./components/ui/Button";
+import IconButton from "./components/ui/IconButton";
+import ConfirmDialog from "./components/ui/ConfirmDialog";
+import Dialog from "./components/ui/Dialog";
+import {
+  DropdownMenu,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+} from "./components/ui/DropdownMenu";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "./components/ui/Tabs";
 
-function App() {
-  const [count, setCount] = useState(0)
+export default function App() {
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [dialogOpen, setDialogOpen] = useState(false);
 
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.jsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
+    <main className="min-h-screen bg-ivory p-8">
+      <div className="mx-auto flex max-w-2xl flex-col gap-6">
+        <h1 className="font-serif text-3xl text-charcoal">Phase 2 overlays</h1>
 
-      <div className="ticks"></div>
+        <div className="flex flex-wrap gap-3">
+          <Button onClick={() => setDialogOpen(true)}>Open Dialog</Button>
+          <Button variant="danger" onClick={() => setConfirmOpen(true)}>
+            Open Confirm
+          </Button>
 
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
+          <DropdownMenu
+            trigger={
+              <IconButton label="Album actions">
+                <MoreHorizontal size={18} />
+              </IconButton>
+            }
+          >
+            <DropdownMenuItem onSelect={() => setDialogOpen(true)}>
+              <Pencil size={14} /> Edit details
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem danger onSelect={() => setConfirmOpen(true)}>
+              <Trash2 size={14} /> Delete album
+            </DropdownMenuItem>
+          </DropdownMenu>
         </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
 
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
-  )
+        <Tabs defaultValue="photos">
+          <TabsList>
+            <TabsTrigger value="photos">Photos</TabsTrigger>
+            <TabsTrigger value="details">Album Details</TabsTrigger>
+            <TabsTrigger value="privacy">Privacy</TabsTrigger>
+            <TabsTrigger value="client">Client</TabsTrigger>
+          </TabsList>
+          <TabsContent value="photos">
+            <p className="text-sm text-charcoal/60">Photos tab content.</p>
+          </TabsContent>
+          <TabsContent value="details">
+            <p className="text-sm text-charcoal/60">Details tab content.</p>
+          </TabsContent>
+          <TabsContent value="privacy">
+            <p className="text-sm text-charcoal/60">Privacy tab content.</p>
+          </TabsContent>
+          <TabsContent value="client">
+            <p className="text-sm text-charcoal/60">Client tab content.</p>
+          </TabsContent>
+        </Tabs>
+      </div>
+
+      <Dialog
+        open={dialogOpen}
+        onOpenChange={setDialogOpen}
+        title="Edit album details"
+        description="Changes are visible to you immediately."
+        footer={
+          <>
+            <Button variant="outline" onClick={() => setDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={() => setDialogOpen(false)}>Save changes</Button>
+          </>
+        }
+      >
+        <p className="text-sm text-charcoal/70">Dialog body content goes here.</p>
+      </Dialog>
+
+      <ConfirmDialog
+        open={confirmOpen}
+        onOpenChange={setConfirmOpen}
+        title="Delete this album?"
+        description="This action cannot be undone. The album and its photos will be permanently removed."
+        confirmLabel="Delete album"
+        danger
+        onConfirm={() => setConfirmOpen(false)}
+      />
+    </main>
+  );
 }
-
-export default App
