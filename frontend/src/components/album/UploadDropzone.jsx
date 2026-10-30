@@ -1,3 +1,4 @@
+import { forwardRef, useImperativeHandle } from "react";
 import { useDropzone } from "react-dropzone";
 import { Upload, Image as ImageIcon } from "lucide-react";
 import { cn } from "../../lib/utils";
@@ -9,13 +10,18 @@ const ACCEPT = {
   "image/webp": [".webp"],
 };
 
-export default function UploadDropzone({ onDrop, disabled }) {
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+const UploadDropzone = forwardRef(function UploadDropzone(
+  { onDrop, disabled, hint = "Supports JPEG, PNG, WebP, and HEIC" },
+  ref
+) {
+  const { getRootProps, getInputProps, isDragActive, open } = useDropzone({
     accept: ACCEPT,
     onDrop,
     disabled,
     multiple: true,
   });
+
+  useImperativeHandle(ref, () => ({ open: () => { if (!disabled) open(); } }), [open, disabled]);
 
   return (
     <div
@@ -40,10 +46,10 @@ export default function UploadDropzone({ onDrop, disabled }) {
         <p className="text-sm text-charcoal/60">
           or <span className="font-medium text-olive">browse files</span>
         </p>
-        <p className="mt-1 text-xs text-charcoal/50">
-          Supports JPEG, PNG, WebP, and HEIC
-        </p>
+        <p className="mt-1 text-xs text-charcoal/50">{hint}</p>
       </div>
     </div>
   );
-}
+});
+
+export default UploadDropzone;

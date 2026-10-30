@@ -11,6 +11,19 @@ import CreateAlbumPage from "../features/albums/pages/CreateAlbumPage";
 import AlbumWorkspaceLayout from "./layouts/AlbumWorkspaceLayout";
 import AlbumPhotosPage from "../features/albums/pages/AlbumPhotosPage";
 import AlbumDetailsTab from "../components/album/AlbumDetailsTab";
+import AlbumPrivacyTab from "../components/album/AlbumPrivacyTab";
+import AlbumClientTab from "../components/album/AlbumClientTab";
+import UploadManagerPage from "../features/uploads/pages/UploadManagerPage";
+import ClientsPage from "../features/clients/pages/ClientsPage";
+import CreateClientPage from "../features/clients/pages/CreateClientPage";
+import ClientDetailsPage from "../features/clients/pages/ClientDetailsPage";
+import AnalyticsPage from "../features/analytics/pages/AnalyticsPage";
+import SettingsLayout from "../components/settings/SettingsLayout";
+import SettingsOverviewPage from "../features/settings/pages/SettingsOverviewPage";
+import ProfileSettingsPage from "../features/settings/pages/ProfileSettingsPage";
+import SecuritySettingsPage from "../features/settings/pages/SecuritySettingsPage";
+import BrandingSettingsPage from "../features/settings/pages/BrandingSettingsPage";
+import PreferencesSettingsPage from "../features/settings/pages/PreferencesSettingsPage";
 
 const router = createBrowserRouter([
   { path: "/", element: <Navigate to="/dashboard" replace /> },
@@ -26,18 +39,26 @@ const router = createBrowserRouter([
         children: [
           { index: true, element: <AlbumPhotosPage /> },
           { path: "details", element: <AlbumDetailsTab /> },
-          { path: "privacy", element: <PlaceholderPage title="Privacy" /> },
-          { path: "client", element: <PlaceholderPage title="Client" /> },
+          { path: "privacy", element: <AlbumPrivacyTab /> },
+          { path: "client", element: <AlbumClientTab /> },
         ],
       },
-      { path: "/uploads", element: <PlaceholderPage title="Uploads" /> },
-      { path: "/clients", element: <PlaceholderPage title="Clients" /> },
-      { path: "/analytics", element: <PlaceholderPage title="Analytics" /> },
-      { path: "/settings", element: <PlaceholderPage title="Settings" /> },
-      { path: "/settings/profile", element: <PlaceholderPage title="Profile" /> },
-      { path: "/settings/security", element: <PlaceholderPage title="Security" /> },
-      { path: "/settings/branding", element: <PlaceholderPage title="Studio Branding" /> },
-      { path: "/settings/preferences", element: <PlaceholderPage title="Preferences" /> },
+      { path: "/uploads", element: <UploadManagerPage /> },
+      { path: "/clients", element: <ClientsPage /> },
+      { path: "/clients/new", element: <CreateClientPage /> },
+      { path: "/clients/:clientId", element: <ClientDetailsPage /> },
+      { path: "/analytics", element: <AnalyticsPage /> },
+      {
+        path: "/settings",
+        element: <SettingsLayout />,
+        children: [
+          { index: true, element: <SettingsOverviewPage /> },
+          { path: "profile", element: <ProfileSettingsPage /> },
+          { path: "security", element: <SecuritySettingsPage /> },
+          { path: "branding", element: <BrandingSettingsPage /> },
+          { path: "preferences", element: <PreferencesSettingsPage /> },
+        ],
+      },
     ],
   },
   { path: "/login", element: <LoginPage /> },
