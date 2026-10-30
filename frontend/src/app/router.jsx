@@ -1,6 +1,10 @@
 import { createBrowserRouter, Navigate, RouterProvider } from "react-router-dom";
 import WorkspaceLayout from "./layouts/WorkspaceLayout";
+import ClientLayout from "./layouts/ClientsLayout";
+import ErrorBoundary from "./ErrorBoundary";
 import PlaceholderPage from "../components/shared/PlaceholderPage";
+import NotFoundPage from "../components/shared/NotFoundPage";
+import MarketingPage from "../features/marketing/pages/MarketingPage";
 import LoginPage from "../features/auth/pages/LoginPage";
 import RegisterPage from "../features/auth/pages/RegisterPage";
 import ForgotPasswordPage from "../features/auth/pages/ForgotPasswordPage";
@@ -24,9 +28,11 @@ import ProfileSettingsPage from "../features/settings/pages/ProfileSettingsPage"
 import SecuritySettingsPage from "../features/settings/pages/SecuritySettingsPage";
 import BrandingSettingsPage from "../features/settings/pages/BrandingSettingsPage";
 import PreferencesSettingsPage from "../features/settings/pages/PreferencesSettingsPage";
+import AlbumPasswordPage from "../features/client-access/pages/AlbumPasswordPage";
+import ClientGalleryPage from "../features/client-access/pages/ClientGalleryPage";
 
 const router = createBrowserRouter([
-  { path: "/", element: <Navigate to="/dashboard" replace /> },
+  { path: "/", element: <MarketingPage /> },
   {
     element: <WorkspaceLayout />,
     children: [
@@ -65,10 +71,21 @@ const router = createBrowserRouter([
   { path: "/register", element: <RegisterPage /> },
   { path: "/forgot-password", element: <ForgotPasswordPage /> },
   { path: "/reset-password", element: <ResetPasswordPage /> },
-  { path: "/a/:accessToken", element: <PlaceholderPage title="Client Album Access" /> },
-  { path: "/a/:accessToken/gallery", element: <PlaceholderPage title="Client Gallery" /> },
+  {
+    element: <ClientLayout />,
+    children: [
+      { path: "/a/:accessToken", element: <AlbumPasswordPage /> },
+      { path: "/a/:accessToken/gallery", element: <ClientGalleryPage /> },
+    ],
+  },
+  { path: "/index.html", element: <Navigate to="/" replace /> },
+  { path: "*", element: <NotFoundPage /> },
 ]);
 
 export default function AppRouter() {
-  return <RouterProvider router={router} />;
+  return (
+    <ErrorBoundary>
+      <RouterProvider router={router} />
+    </ErrorBoundary>
+  );
 }

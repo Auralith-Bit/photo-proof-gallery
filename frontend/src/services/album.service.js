@@ -2,18 +2,15 @@ import { mockAlbums } from "../mocks/albums.mock";
 import { mockPhotos } from "../mocks/photos.mock";
 import { mockClients } from "../mocks/clients.mock";
 import { getPreferencesSync } from "./settings.service";
+import { hasPassword, setPassword, removePassword } from "./albumSecrets.store";
 
 const delay = (ms = 400) => new Promise((resolve) => setTimeout(resolve, ms));
-
-// Mock-only password store. A real backend would store a hash and never return it.
-const albumPasswords = new Map();
-albumPasswords.set("alb_01", "frameora");
 
 function withPrivacy(album) {
   return {
     ...album,
     clientName: mockClients.find((c) => c.id === album.clientId)?.fullName || null,
-    hasPassword: albumPasswords.has(album.id),
+    hasPassword: hasPassword(album.id),
   };
 }
 
@@ -55,7 +52,7 @@ export async function deleteAlbum(albumId) {
   const index = mockAlbums.findIndex((a) => a.id === albumId);
   if (index === -1) throw new Error("Album not found");
   const [removed] = mockAlbums.splice(index, 1);
-  albumPasswords.delete(removed.id);
+  removePassword(removed.id);
   return removed;
 }
 
@@ -78,7 +75,6 @@ export async function createAlbum(data) {
     clientId = newClient.id;
   }
 
-  // New albums honour the studio's default preferences.
   const prefs = getPreferencesSync();
   const shareImmediately = prefs.defaultAlbumAccess === "share";
 
@@ -101,7 +97,7 @@ export async function createAlbum(data) {
   mockAlbums.unshift(newAlbum);
   mockPhotos[newAlbum.id] = [];
 
-  if (data.password) albumPasswords.set(newAlbum.id, data.password);
+  if (data.password) setPassword(newAlbum.id, data.password);
 
   return withPrivacy(newAlbum);
 }
@@ -141,14 +137,14 @@ export async function setAlbumPassword(albumId, password) {
   if (!password || password.length < 6) {
     throw new Error("Password must be at least 6 characters.");
   }
-  albumPasswords.set(albumId, password);
+  setPassword(albumId, password);
   return withPrivacy(mockAlbums.find((a) => a.id === albumId));
 }
 
 export async function removeAlbumPassword(albumId) {
   await delay();
   findAlbum(albumId);
-  albumPasswords.delete(albumId);
+  removePassword(albumId);
   return withPrivacy(mockAlbums.find((a) => a.id === albumId));
 }
 
