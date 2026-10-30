@@ -11,8 +11,8 @@ export default function AlbumWorkspaceHeader({ album, loading }) {
   if (loading) {
     return (
       <header className="mb-6">
-        <Skeleton className="h-5 w-40 mb-2" />
-        <Skeleton className="h-8 w-96 mb-3" />
+        <Skeleton className="mb-2 h-5 w-40" />
+        <Skeleton className="mb-3 h-8 w-96" />
         <div className="flex gap-4">
           <Skeleton className="h-4 w-24" />
           <Skeleton className="h-4 w-32" />
@@ -30,7 +30,7 @@ export default function AlbumWorkspaceHeader({ album, loading }) {
       <button
         type="button"
         onClick={() => navigate("/albums")}
-        className="mb-4 flex items-center gap-1.5 text-sm font-medium text-charcoal/60 hover:text-charcoal focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-olive/60 rounded-control"
+        className="mb-4 flex items-center gap-1.5 rounded-control text-sm font-medium text-charcoal/60 hover:text-charcoal focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-olive/60"
       >
         <ArrowLeft size={16} aria-hidden="true" />
         Back to My Albums

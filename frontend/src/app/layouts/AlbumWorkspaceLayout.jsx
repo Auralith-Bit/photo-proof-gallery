@@ -29,7 +29,7 @@ export default function AlbumWorkspaceLayout() {
         <p className="text-charcoal/60">This album could not be found.</p>
         <button
           onClick={() => navigate("/albums")}
-          className="rounded-control bg-charcoal px-4 py-2 text-sm font-medium text-white hover:bg-charcoal/90"
+          className="rounded-control bg-charcoal px-4 py-2 text-sm font-medium text-white hover:bg-charcoal/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-olive/60"
         >
           Back to My Albums
         </button>

@@ -20,7 +20,6 @@ export default function PhotosTab({ albumId }) {
   const [lightboxIndex, setLightboxIndex] = useState(-1);
   const [uploadQueue, setUploadQueue] = useState([]);
   const [deleteConfirm, setDeleteConfirm] = useState(null);
-  const fileInputRef = useRef(null);
 
   const selectionMode = selectedIds.size > 0;
 
@@ -28,6 +27,7 @@ export default function PhotosTab({ albumId }) {
     const newItems = files.map((file) => ({
       id: `local_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
       file,
+      name: file.name,
       status: "uploading",
       progress: 0,
     }));
@@ -35,7 +35,6 @@ export default function PhotosTab({ albumId }) {
 
     for (const item of newItems) {
       try {
-        // Simulate progress
         setUploadQueue((prev) =>
           prev.map((u) => (u.id === item.id ? { ...u, progress: 50 } : u))
         );
@@ -50,7 +49,6 @@ export default function PhotosTab({ albumId }) {
       }
     }
 
-    // Clean up completed items after 2 seconds
     setTimeout(() => {
       setUploadQueue((prev) => prev.filter((u) => u.status !== "completed"));
     }, 2000);
@@ -76,8 +74,8 @@ export default function PhotosTab({ albumId }) {
   }
 
   function handleBulkDelete() {
-    const photosToDelete = photos.filter((p) => selectedIds.has(p.id));
-    setDeleteConfirm({ photos: photosToDelete, bulk: true });
+    const targets = photos.filter((p) => selectedIds.has(p.id));
+    setDeleteConfirm({ photos: targets, bulk: true });
   }
 
   async function confirmDelete() {
@@ -119,7 +117,7 @@ export default function PhotosTab({ albumId }) {
           <div className="flex flex-col gap-2">
             {uploadQueue.map((item) => (
               <div key={item.id} className="flex items-center gap-3">
-                <div className="flex-1 truncate text-sm text-charcoal">{item.file.name}</div>
+                <div className="flex-1 truncate text-sm text-charcoal">{item.name}</div>
                 {item.status === "uploading" && <Spinner />}
                 {item.status === "completed" && (
                   <Check size={16} className="text-success" aria-label="Completed" />

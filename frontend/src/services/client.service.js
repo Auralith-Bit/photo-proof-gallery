@@ -1,18 +1,17 @@
-import { mockClients } from "../mocks/clients.mock";
-import { mockAlbums } from "../mocks/albums.mock";
+import { albums, clients, saveAlbums, saveClients } from "../mocks/store";
 
 const delay = (ms = 400) => new Promise((resolve) => setTimeout(resolve, ms));
 
 function findClient(clientId) {
-  const client = mockClients.find((c) => c.id === clientId);
+  const client = clients.find((c) => c.id === clientId);
   if (!client) throw new Error("Client not found");
   return client;
 }
 
 function latestAlbumFor(clientId) {
-  const albums = mockAlbums.filter((a) => a.clientId === clientId);
-  if (albums.length === 0) return null;
-  const sorted = [...albums].sort(
+  const list = albums.filter((a) => a.clientId === clientId);
+  if (list.length === 0) return null;
+  const sorted = [...list].sort(
     (a, b) => new Date(b.eventDate || b.updatedAt) - new Date(a.eventDate || a.updatedAt)
   );
   const top = sorted[0];
@@ -22,15 +21,14 @@ function latestAlbumFor(clientId) {
 function decorate(client) {
   return {
     ...client,
-    albumCount: mockAlbums.filter((a) => a.clientId === client.id).length,
+    albumCount: albums.filter((a) => a.clientId === client.id).length,
     latestAlbum: latestAlbumFor(client.id),
   };
 }
 
 export async function getClients() {
   await delay();
-  // active first, archived last — keeps the directory honest without a filter bar
-  return mockClients
+  return clients
     .map(decorate)
     .sort((a, b) => {
       if (a.status === b.status) return new Date(b.updatedAt) - new Date(a.updatedAt);
@@ -55,7 +53,8 @@ export async function createClient(data) {
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   };
-  mockClients.push(newClient);
+  clients.push(newClient);
+  saveClients();
   return decorate(newClient);
 }
 
@@ -67,6 +66,7 @@ export async function updateClient(clientId, data) {
   if (data.phone !== undefined) client.phone = data.phone?.trim() || "";
   if (data.notes !== undefined) client.notes = data.notes?.trim() || "";
   client.updatedAt = new Date().toISOString();
+  saveClients();
   return decorate(client);
 }
 
@@ -75,6 +75,7 @@ export async function archiveClient(clientId) {
   const client = findClient(clientId);
   client.status = "archived";
   client.updatedAt = new Date().toISOString();
+  saveClients();
   return decorate(client);
 }
 
@@ -83,20 +84,23 @@ export async function restoreClient(clientId) {
   const client = findClient(clientId);
   client.status = "active";
   client.updatedAt = new Date().toISOString();
+  saveClients();
   return decorate(client);
 }
 
 export async function deleteClient(clientId) {
   await delay();
-  const index = mockClients.findIndex((c) => c.id === clientId);
+  const index = clients.findIndex((c) => c.id === clientId);
   if (index === -1) throw new Error("Client not found");
-  const [removed] = mockClients.splice(index, 1);
+  const [removed] = clients.splice(index, 1);
   // Consequence: albums survive but become unassigned (never deleted).
-  mockAlbums.forEach((album) => {
+  albums.forEach((album) => {
     if (album.clientId === clientId) {
       album.clientId = null;
       album.updatedAt = new Date().toISOString();
     }
   });
+  saveClients();
+  saveAlbums();
   return removed;
 }

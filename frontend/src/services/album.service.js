@@ -1,6 +1,4 @@
-import { mockAlbums } from "../mocks/albums.mock";
-import { mockPhotos } from "../mocks/photos.mock";
-import { mockClients } from "../mocks/clients.mock";
+import { albums, photos, clients, saveAlbums, savePhotos, saveClients } from "../mocks/store";
 import { getPreferencesSync } from "./settings.service";
 import { hasPassword, setPassword, removePassword } from "./albumSecrets.store";
 
@@ -9,26 +7,26 @@ const delay = (ms = 400) => new Promise((resolve) => setTimeout(resolve, ms));
 function withPrivacy(album) {
   return {
     ...album,
-    clientName: mockClients.find((c) => c.id === album.clientId)?.fullName || null,
+    clientName: clients.find((c) => c.id === album.clientId)?.fullName || null,
     hasPassword: hasPassword(album.id),
   };
 }
 
 function findAlbum(albumId) {
-  const album = mockAlbums.find((a) => a.id === albumId);
+  const album = albums.find((a) => a.id === albumId);
   if (!album) throw new Error("Album not found");
   return album;
 }
 
 export async function getAlbums() {
   await delay();
-  return mockAlbums.map(withPrivacy);
+  return albums.map(withPrivacy);
 }
 
 export async function getAlbumById(albumId) {
   await delay();
   const album = findAlbum(albumId);
-  return { ...withPrivacy(album), photos: mockPhotos[albumId] || [] };
+  return { ...withPrivacy(album), photos: photos[albumId] || [] };
 }
 
 export async function archiveAlbum(albumId) {
@@ -36,6 +34,7 @@ export async function archiveAlbum(albumId) {
   const album = findAlbum(albumId);
   album.status = "archived";
   album.updatedAt = new Date().toISOString();
+  saveAlbums();
   return withPrivacy(album);
 }
 
@@ -44,15 +43,19 @@ export async function restoreAlbum(albumId) {
   const album = findAlbum(albumId);
   album.status = "active";
   album.updatedAt = new Date().toISOString();
+  saveAlbums();
   return withPrivacy(album);
 }
 
 export async function deleteAlbum(albumId) {
   await delay();
-  const index = mockAlbums.findIndex((a) => a.id === albumId);
+  const index = albums.findIndex((a) => a.id === albumId);
   if (index === -1) throw new Error("Album not found");
-  const [removed] = mockAlbums.splice(index, 1);
+  const [removed] = albums.splice(index, 1);
   removePassword(removed.id);
+  delete photos[removed.id];
+  saveAlbums();
+  savePhotos();
   return removed;
 }
 
@@ -71,7 +74,8 @@ export async function createAlbum(data) {
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
-    mockClients.push(newClient);
+    clients.push(newClient);
+    saveClients();
     clientId = newClient.id;
   }
 
@@ -94,10 +98,11 @@ export async function createAlbum(data) {
     updatedAt: new Date().toISOString(),
   };
 
-  mockAlbums.unshift(newAlbum);
-  mockPhotos[newAlbum.id] = [];
-
+  albums.unshift(newAlbum);
+  photos[newAlbum.id] = [];
   if (data.password) setPassword(newAlbum.id, data.password);
+  saveAlbums();
+  savePhotos();
 
   return withPrivacy(newAlbum);
 }
@@ -110,6 +115,7 @@ export async function updateAlbum(albumId, data) {
   if (data.eventDate !== undefined) album.eventDate = data.eventDate;
   if (data.clientId !== undefined) album.clientId = data.clientId;
   album.updatedAt = new Date().toISOString();
+  saveAlbums();
   return withPrivacy(album);
 }
 
@@ -120,6 +126,7 @@ export async function setAccessEnabled(albumId, enabled) {
   const album = findAlbum(albumId);
   album.accessEnabled = enabled;
   album.updatedAt = new Date().toISOString();
+  saveAlbums();
   return withPrivacy(album);
 }
 
@@ -128,6 +135,7 @@ export async function setDownloadPermission(albumId, allow) {
   const album = findAlbum(albumId);
   album.allowDownload = allow;
   album.updatedAt = new Date().toISOString();
+  saveAlbums();
   return withPrivacy(album);
 }
 
@@ -138,14 +146,14 @@ export async function setAlbumPassword(albumId, password) {
     throw new Error("Password must be at least 6 characters.");
   }
   setPassword(albumId, password);
-  return withPrivacy(mockAlbums.find((a) => a.id === albumId));
+  return withPrivacy(albums.find((a) => a.id === albumId));
 }
 
 export async function removeAlbumPassword(albumId) {
   await delay();
   findAlbum(albumId);
   removePassword(albumId);
-  return withPrivacy(mockAlbums.find((a) => a.id === albumId));
+  return withPrivacy(albums.find((a) => a.id === albumId));
 }
 
 export async function regenerateAlbumLink(albumId) {
@@ -153,5 +161,6 @@ export async function regenerateAlbumLink(albumId) {
   const album = findAlbum(albumId);
   album.accessToken = `tok_${Math.random().toString(36).substring(2, 10)}`;
   album.updatedAt = new Date().toISOString();
+  saveAlbums();
   return withPrivacy(album);
 }
