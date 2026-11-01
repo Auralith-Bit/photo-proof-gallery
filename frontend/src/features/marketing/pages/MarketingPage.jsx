@@ -1,8 +1,7 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import {
   Aperture,
   ArrowRight,
-  BarChart3,
   Check,
   Images,
   Layers,
@@ -13,6 +12,7 @@ import {
   Users,
 } from "lucide-react";
 import Button from "../../../components/ui/Button";
+import { useAuth } from "../../../hooks/useAuth";
 import { cn } from "../../../lib/utils";
 
 const FEATURES = [
@@ -91,6 +91,17 @@ const CLIENT_STEPS = [
   "Open photos full-screen",
   "Download only when permitted",
 ];
+
+// Styled links that mirror the Button visuals (keeps markup valid: no <a> inside <button>).
+const linkPrimary =
+  "inline-flex h-10 items-center justify-center gap-2 rounded-control bg-charcoal px-4 text-sm font-medium text-white transition-colors hover:bg-charcoal/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-olive/60 focus-visible:ring-offset-2 focus-visible:ring-offset-ivory";
+const linkPrimaryLg = linkPrimary.replace("h-10", "h-12").replace("px-4 text-sm", "px-5 text-base");
+const linkOliveLg =
+  "inline-flex h-12 items-center justify-center gap-2 rounded-control bg-olive px-5 text-base font-medium text-white transition-colors hover:bg-olive/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:ring-offset-2 focus-visible:ring-offset-charcoal";
+const linkGhost =
+  "rounded-control px-3 py-2 text-sm font-medium text-charcoal/70 hover:text-charcoal focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-olive/60";
+const linkWhiteGhost =
+  "rounded-control px-5 py-3 text-sm font-medium text-white/80 underline-offset-4 hover:text-white hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50";
 
 function scrollToFeatures() {
   const el = document.getElementById("features");
@@ -177,6 +188,14 @@ function StepList({ title, icon: Icon, steps }) {
 }
 
 export default function MarketingPage() {
+  const navigate = useNavigate();
+  const { isAuthenticated, user, signOut } = useAuth();
+
+  function handleSignOut() {
+    signOut();
+    navigate("/", { replace: true });
+  }
+
   return (
     <div className="min-h-screen bg-ivory text-charcoal">
       {/* Public header */}
@@ -193,21 +212,29 @@ export default function MarketingPage() {
             <button
               type="button"
               onClick={scrollToFeatures}
-              className="hidden rounded-control px-3 py-2 text-sm font-medium text-charcoal/70 hover:text-charcoal focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-olive/60 sm:block"
+              className={cn(linkGhost, "hidden sm:block")}
             >
               Features
             </button>
-            <Link
-              to="/login"
-              className="rounded-control px-3 py-2 text-sm font-medium text-charcoal/70 hover:text-charcoal focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-olive/60"
-            >
-              Sign In
-            </Link>
-            <Button size="sm" onClick={undefined} asChild={false}>
-              <Link to="/register" className="flex items-center gap-1.5">
-                Get Started <ArrowRight size={15} aria-hidden="true" />
-              </Link>
-            </Button>
+            {isAuthenticated ? (
+              <>
+                <Link to="/dashboard" className={linkPrimary}>
+                  Open workspace
+                </Link>
+                <button type="button" onClick={handleSignOut} className={linkGhost}>
+                  Sign out
+                </button>
+              </>
+            ) : (
+              <>
+                <Link to="/login" className={linkGhost}>
+                  Sign In
+                </Link>
+                <Link to="/register" className={linkPrimary}>
+                  Get Started <ArrowRight size={15} aria-hidden="true" />
+                </Link>
+              </>
+            )}
           </nav>
         </div>
       </header>
@@ -231,19 +258,29 @@ export default function MarketingPage() {
                 gallery worth remembering.
               </p>
               <div className="mt-8 flex flex-wrap gap-3">
-                <Button size="lg" asChild={false}>
-                  <Link to="/register" className="flex items-center gap-2">
+                {isAuthenticated ? (
+                  <Link to="/dashboard" className={linkPrimaryLg}>
+                    Go to your workspace <ArrowRight size={16} aria-hidden="true" />
+                  </Link>
+                ) : (
+                  <Link to="/register" className={linkPrimaryLg}>
                     Get Started <ArrowRight size={16} aria-hidden="true" />
                   </Link>
-                </Button>
+                )}
                 <Button size="lg" variant="outline" onClick={scrollToFeatures}>
                   Explore Features
                 </Button>
               </div>
-              <p className="mt-6 flex items-center gap-2 text-[13px] text-charcoal/50">
-                <Lock size={13} aria-hidden="true" />
-                No client accounts. Password-protected links. QR-ready.
-              </p>
+              {isAuthenticated ? (
+                <p className="mt-6 text-[13px] text-charcoal/50">
+                  You're signed in as <span className="font-medium text-charcoal/70">{user?.name}</span>.
+                </p>
+              ) : (
+                <p className="mt-6 flex items-center gap-2 text-[13px] text-charcoal/50">
+                  <Lock size={13} aria-hidden="true" />
+                  No client accounts. Password-protected links. QR-ready.
+                </p>
+              )}
             </div>
 
             <div className="grid grid-cols-2 gap-3">
@@ -317,23 +354,33 @@ export default function MarketingPage() {
           <div className="mx-auto flex max-w-[1200px] flex-col items-center gap-6 px-4 py-20 text-center md:px-8 md:py-28">
             <Aperture size={30} className="text-gold" aria-hidden="true" />
             <h2 className="max-w-2xl font-serif text-3xl leading-tight text-white md:text-4xl">
-              Ready to preserve every moment?
+              {isAuthenticated ? "Your studio is ready when you are" : "Ready to preserve every moment?"}
             </h2>
             <p className="max-w-md text-[15px] leading-7 text-white/70">
-              Set up your studio, create your first album, and share a private gallery in minutes.
+              {isAuthenticated
+                ? "Jump back into your workspace to manage albums, uploads, and client galleries."
+                : "Set up your studio, create your first album, and share a private gallery in minutes."}
             </p>
             <div className="mt-2 flex flex-wrap items-center justify-center gap-3">
-              <Button size="lg" variant="secondary" asChild={false}>
-                <Link to="/register" className="flex items-center gap-2">
-                  Get Started <ArrowRight size={16} aria-hidden="true" />
-                </Link>
-              </Button>
-              <Link
-                to="/login"
-                className="rounded-control px-5 py-3 text-sm font-medium text-white/80 underline-offset-4 hover:text-white hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50"
-              >
-                Sign in to your workspace
-              </Link>
+              {isAuthenticated ? (
+                <>
+                  <Link to="/dashboard" className={linkOliveLg}>
+                    Open your workspace <ArrowRight size={16} aria-hidden="true" />
+                  </Link>
+                  <button type="button" onClick={handleSignOut} className={linkWhiteGhost}>
+                    Sign out of this device
+                  </button>
+                </>
+              ) : (
+                <>
+                  <Link to="/register" className={linkOliveLg}>
+                    Get Started <ArrowRight size={16} aria-hidden="true" />
+                  </Link>
+                  <Link to="/login" className={linkWhiteGhost}>
+                    Sign in to your workspace
+                  </Link>
+                </>
+              )}
             </div>
           </div>
         </section>
@@ -350,15 +397,30 @@ export default function MarketingPage() {
             </span>
           </div>
           <nav className="flex items-center gap-5 text-sm text-charcoal/60">
-            <Link to="/features" onClick={scrollToFeatures} className="hover:text-charcoal rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-olive/60">
+            <button
+              type="button"
+              onClick={scrollToFeatures}
+              className="rounded hover:text-charcoal focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-olive/60"
+            >
               Features
-            </Link>
-            <Link to="/login" className="hover:text-charcoal rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-olive/60">
-              Sign In
-            </Link>
-            <Link to="/register" className="hover:text-charcoal rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-olive/60">
-              Create account
-            </Link>
+            </button>
+            {isAuthenticated ? (
+              <Link
+                to="/dashboard"
+                className="rounded font-medium text-olive hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-olive/60"
+              >
+                Open workspace
+              </Link>
+            ) : (
+              <>
+                <Link to="/login" className="rounded hover:text-charcoal focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-olive/60">
+                  Sign In
+                </Link>
+                <Link to="/register" className="rounded hover:text-charcoal focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-olive/60">
+                  Create account
+                </Link>
+              </>
+            )}
           </nav>
           <p className="text-[13px] text-charcoal/40">© {new Date().getFullYear()} Frameora</p>
         </div>

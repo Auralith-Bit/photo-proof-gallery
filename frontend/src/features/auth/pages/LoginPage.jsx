@@ -1,8 +1,8 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Link, useNavigate, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
 import AuthLayout from "../../../app/layouts/AuthLayout";
 import Input from "../../../components/ui/Input";
@@ -10,7 +10,7 @@ import PasswordInput from "../../../components/ui/PasswordInput";
 import Button from "../../../components/ui/Button";
 import InlineAlert from "../../../components/ui/InlineAlert";
 import { login } from "../../../services/auth.service";
-import { useUser } from "../../../hooks/useUser";
+import { useAuth } from "../../../hooks/useAuth";
 
 const emailField = z
   .string()
@@ -26,7 +26,7 @@ export default function LoginPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const queryClient = useQueryClient();
-  const { data: currentUser } = useUser();
+  const { signIn } = useAuth();
   const [formError, setFormError] = useState("");
 
   const {
@@ -35,22 +35,16 @@ export default function LoginPage() {
     formState: { errors, isSubmitting },
   } = useForm({ resolver: zodResolver(schema) });
 
-  useEffect(() => {
-    if (currentUser) {
-      const from = location.state?.from?.pathname || "/dashboard";
-      navigate(from, { replace: true });
-    }
-  }, [currentUser, navigate, location]);
+  const from = location.state?.from?.pathname || "/dashboard";
 
   async function onSubmit(values) {
     setFormError("");
     try {
       const res = await login(values);
-      if (res?.user) {
-        queryClient.setQueryData(["user"], res.user);
-      }
-      await queryClient.invalidateQueries({ queryKey: ["user"] });
-      const from = location.state?.from?.pathname || "/dashboard";
+      const user = res?.user || res;
+      signIn(user);
+      queryClient.setQueryData(["user"], user);
+      queryClient.invalidateQueries({ queryKey: ["user"] });
       navigate(from, { replace: true });
     } catch (error) {
       setFormError(error.message || "Invalid email or password.");

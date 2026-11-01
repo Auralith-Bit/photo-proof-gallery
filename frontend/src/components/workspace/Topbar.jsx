@@ -12,6 +12,7 @@ import {
 } from "../ui/DropdownMenu";
 import { useUiStore } from "../../stores/uiStore";
 import { useUser } from "../../hooks/useUser";
+import { useAuth } from "../../hooks/useAuth";
 import { logout } from "../../services/auth.service";
 import Breadcrumbs from "./Breadcrumbs";
 
@@ -28,10 +29,15 @@ function getInitials(name) {
 export default function Topbar() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const { data: user } = useUser();
+  const { data: userData } = useUser();
+  const { user: authUser, signOut } = useAuth();
   const [query, setQuery] = useState("");
   const toggleSidebar = useUiStore((s) => s.toggleSidebar);
   const setDrawerOpen = useUiStore((s) => s.setMobileDrawerOpen);
+
+  const currentUser = userData || authUser;
+  const displayName = currentUser?.name || "Photographer";
+  const initials = getInitials(displayName) || "P";
 
   function handleSearch(event) {
     event.preventDefault();
@@ -45,6 +51,7 @@ export default function Topbar() {
     } catch (err) {
       console.error("Sign out error:", err);
     } finally {
+      signOut();
       queryClient.clear();
       navigate("/login", { replace: true });
     }
@@ -106,15 +113,20 @@ export default function Topbar() {
             trigger={
               <button
                 type="button"
-                aria-label="Account menu"
+                aria-label={`Account menu for ${displayName}`}
                 className="flex h-9 w-9 items-center justify-center rounded-full bg-olive text-sm font-semibold text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-olive/60 focus-visible:ring-offset-2 focus-visible:ring-offset-ivory"
               >
-                {getInitials(user?.name)}
+                {initials}
               </button>
             }
           >
             <DropdownMenuLabel>
-              {user?.name ? `Signed in as ${user.name}` : "Signed in as Photographer"}
+              Signed in as {displayName}
+              {currentUser?.email ? (
+                <span className="mt-0.5 block truncate text-[12px] font-normal text-charcoal/50">
+                  {currentUser.email}
+                </span>
+              ) : null}
             </DropdownMenuLabel>
             <DropdownMenuItem onSelect={() => navigate("/settings/profile")}>Profile</DropdownMenuItem>
             <DropdownMenuItem onSelect={() => navigate("/settings/branding")}>Studio Branding</DropdownMenuItem>

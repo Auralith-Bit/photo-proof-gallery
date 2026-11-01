@@ -1,17 +1,17 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
 import AuthLayout from "../../../app/layouts/AuthLayout";
 import Input from "../../../components/ui/Input";
 import PasswordInput from "../../../components/ui/PasswordInput";
-import Checkbox from "../../../components/ui/checkbox";
+import Checkbox from "../../../components/ui/Checkbox";
 import Button from "../../../components/ui/Button";
 import InlineAlert from "../../../components/ui/InlineAlert";
 import { register as registerUser } from "../../../services/auth.service";
-import { useUser } from "../../../hooks/useUser";
+import { useAuth } from "../../../hooks/useAuth";
 import { toast } from "../../../stores/toastStore";
 
 const emailField = z
@@ -40,8 +40,9 @@ const schema = z
 
 export default function RegisterPage() {
   const navigate = useNavigate();
+  const location = useLocation();
   const queryClient = useQueryClient();
-  const { data: currentUser } = useUser();
+  const { signIn } = useAuth();
   const [formError, setFormError] = useState("");
 
   const {
@@ -50,22 +51,18 @@ export default function RegisterPage() {
     formState: { errors, isSubmitting },
   } = useForm({ resolver: zodResolver(schema), defaultValues: { accept: false } });
 
-  useEffect(() => {
-    if (currentUser) {
-      navigate("/dashboard", { replace: true });
-    }
-  }, [currentUser, navigate]);
+  const from = location.state?.from?.pathname || "/dashboard";
 
   async function onSubmit(values) {
     setFormError("");
     try {
       const res = await registerUser(values);
-      if (res?.user) {
-        queryClient.setQueryData(["user"], res.user);
-      }
-      await queryClient.invalidateQueries({ queryKey: ["user"] });
-      toast.success("Your studio workspace is ready.", "Welcome to Frameora");
-      navigate("/dashboard", { replace: true });
+      const user = res?.user || res;
+      signIn(user);
+      queryClient.setQueryData(["user"], user);
+      queryClient.invalidateQueries({ queryKey: ["user"] });
+      toast.success("Your studio workspace is ready.", `Welcome, ${user.name.split(" ")[0]}`);
+      navigate(from, { replace: true });
     } catch (error) {
       setFormError(error.message || "Failed to create account.");
     }

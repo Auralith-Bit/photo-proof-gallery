@@ -1,5 +1,14 @@
 import { api } from "../lib/api";
 
+function nameFromEmail(email) {
+  const local = (String(email).split("@")[0] || "").replace(/[._-]+/g, " ").trim();
+  if (!local) return "Photographer";
+  return local
+    .split(" ")
+    .map((w) => (w ? w[0].toUpperCase() + w.slice(1) : w))
+    .join(" ");
+}
+
 export async function login({ email, password }) {
   const data = await api.post("/auth/login", { email, password });
   return data;
@@ -24,7 +33,7 @@ export async function requestPasswordReset(email) {
   try {
     return await api.post("/auth/forgot-password", { email });
   } catch {
-    // Graceful fallback for mock reset email
+    // Graceful fallback — avoid exposing whether an email exists
     return { ok: true, email };
   }
 }
