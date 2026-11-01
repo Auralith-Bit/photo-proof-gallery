@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useQueryClient } from "@tanstack/react-query";
 import { Bell, Menu, PanelLeft, Plus, Search } from "lucide-react";
 import Button from "../ui/Button";
 import IconButton from "../ui/IconButton";
@@ -10,10 +11,24 @@ import {
   DropdownMenuSeparator,
 } from "../ui/DropdownMenu";
 import { useUiStore } from "../../stores/uiStore";
+import { useUser } from "../../hooks/useUser";
+import { logout } from "../../services/auth.service";
 import Breadcrumbs from "./Breadcrumbs";
+
+function getInitials(name) {
+  if (!name) return "FP";
+  return name
+    .split(" ")
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0].toUpperCase())
+    .join("");
+}
 
 export default function Topbar() {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const { data: user } = useUser();
   const [query, setQuery] = useState("");
   const toggleSidebar = useUiStore((s) => s.toggleSidebar);
   const setDrawerOpen = useUiStore((s) => s.setMobileDrawerOpen);
@@ -22,6 +37,17 @@ export default function Topbar() {
     event.preventDefault();
     const term = query.trim();
     if (term) navigate(`/albums?q=${encodeURIComponent(term)}`);
+  }
+
+  async function handleSignOut() {
+    try {
+      await logout();
+    } catch (err) {
+      console.error("Sign out error:", err);
+    } finally {
+      queryClient.clear();
+      navigate("/login", { replace: true });
+    }
   }
 
   return (
@@ -83,16 +109,18 @@ export default function Topbar() {
                 aria-label="Account menu"
                 className="flex h-9 w-9 items-center justify-center rounded-full bg-olive text-sm font-semibold text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-olive/60 focus-visible:ring-offset-2 focus-visible:ring-offset-ivory"
               >
-                FP
+                {getInitials(user?.name)}
               </button>
             }
           >
-            <DropdownMenuLabel>Signed in as Photographer</DropdownMenuLabel>
+            <DropdownMenuLabel>
+              {user?.name ? `Signed in as ${user.name}` : "Signed in as Photographer"}
+            </DropdownMenuLabel>
             <DropdownMenuItem onSelect={() => navigate("/settings/profile")}>Profile</DropdownMenuItem>
             <DropdownMenuItem onSelect={() => navigate("/settings/branding")}>Studio Branding</DropdownMenuItem>
             <DropdownMenuItem onSelect={() => navigate("/settings/security")}>Security</DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onSelect={() => navigate("/login")}>Sign Out</DropdownMenuItem>
+            <DropdownMenuItem onSelect={handleSignOut}>Sign Out</DropdownMenuItem>
           </DropdownMenu>
         </div>
       </div>

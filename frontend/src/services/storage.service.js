@@ -1,7 +1,12 @@
-import { mockStorage } from "../mocks/storage.mock";
-const delay = (ms = 400) => new Promise((r) => setTimeout(r, ms));
+import { api } from "../lib/api";
 
 export async function getStorageInfo() {
-  await delay();
-  return mockStorage;
+  try {
+    return await api.get("/settings/storage");
+  } catch {
+    return {
+      usedBytes: 0,
+      totalBytes: 50 * 1024 * 1024 * 1024,
+    };
+  }
 }

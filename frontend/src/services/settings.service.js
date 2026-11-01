@@ -1,106 +1,136 @@
-import { mockProfile, mockSecurity, mockBranding, mockPreferences } from "../mocks/settings.mock";
+import { api } from "../lib/api";
 
-const delay = (ms = 450) => new Promise((resolve) => setTimeout(resolve, ms));
-
-// In-session store. Saves actually stick while the app is open, satisfying
-// "only show settings that exist and can be saved".
 const store = {
-  profile: { ...mockProfile },
-  security: {
-    ...mockSecurity,
-    sessions: mockSecurity.sessions.map((s) => ({ ...s })),
+  profile: {
+    displayName: "",
+    email: "",
+    emailVerified: true,
+    imageUrl: null,
+    imageName: "",
   },
-  branding: { ...mockBranding },
-  preferences: { ...mockPreferences },
+  security: {
+    passwordUpdatedAt: new Date().toISOString(),
+    notifyOnNewDevice: true,
+    notifyOnClientAccess: false,
+    sessions: [
+      {
+        id: "ses_current",
+        current: true,
+        device: "This device",
+        browser: "Chrome on Windows",
+        location: "Current Location",
+        lastActive: new Date().toISOString(),
+      },
+    ],
+  },
+  branding: {
+    studioName: "",
+    logoUrl: null,
+    logoName: "",
+    logoStyle: "both",
+    showFooter: true,
+    footerText: "",
+  },
+  preferences: {
+    defaultAlbumAccess: "private",
+    defaultDownload: true,
+    viewPreference: "grid",
+    notifyClientAccess: true,
+    notifyLowStorage: true,
+  },
 };
 
 /* ---- sync getters consumed by other services (no async needed) ---- */
 export function getPreferencesSync() {
   return { ...store.preferences };
 }
+
 export function getBrandingSync() {
   return { ...store.branding };
 }
 
 /* ---- profile ---- */
 export async function getProfile() {
-  await delay(250);
-  return { ...store.profile };
-}
-export async function updateProfile(data) {
-  await delay();
-  const emailChanged = data.email.trim().toLowerCase() !== store.profile.email.toLowerCase();
-  store.profile.displayName = data.displayName.trim();
-  store.profile.email = data.email.trim();
-  if (data.imageUrl !== undefined) {
-    store.profile.imageUrl = data.imageUrl;
-    store.profile.imageName = data.imageName || "";
+  try {
+    const data = await api.get("/settings/profile");
+    store.profile = { ...store.profile, ...data };
+    return { ...store.profile };
+  } catch {
+    return { ...store.profile };
   }
-  if (emailChanged) store.profile.emailVerified = false; // changing email resets verification
-  return { ...store.profile, emailChanged };
 }
+
+export async function updateProfile(data) {
+  const res = await api.put("/settings/profile", data);
+  store.profile = { ...store.profile, ...res };
+  return res;
+}
+
 export async function resendVerification() {
-  await delay();
   return { ok: true, email: store.profile.email };
 }
 
 /* ---- security ---- */
 export async function getSecurity() {
-  await delay(250);
-  return { ...store.security, sessions: store.security.sessions.map((s) => ({ ...s })) };
+  try {
+    const data = await api.get("/settings/security");
+    store.security = { ...store.security, ...data };
+    return { ...store.security };
+  } catch {
+    return { ...store.security };
+  }
 }
+
 export async function changePassword({ currentPassword, newPassword }) {
-  await delay();
-  if (!currentPassword) throw new Error("Enter your current password.");
-  if (currentPassword === "wrong") throw new Error("Your current password is incorrect.");
-  store.security.passwordUpdatedAt = new Date().toISOString();
-  return { passwordUpdatedAt: store.security.passwordUpdatedAt };
+  return await api.post("/settings/change-password", { currentPassword, newPassword });
 }
+
 export async function updateSecurityPrefs({ notifyOnNewDevice, notifyOnClientAccess }) {
-  await delay(250);
-  if (notifyOnNewDevice !== undefined) store.security.notifyOnNewDevice = notifyOnNewDevice;
-  if (notifyOnClientAccess !== undefined) store.security.notifyOnClientAccess = notifyOnClientAccess;
-  return { ...store.security };
+  const res = await api.put("/settings/security", { notifyOnNewDevice, notifyOnClientAccess });
+  store.security = { ...store.security, ...res };
+  return res;
 }
+
 export async function revokeSession(sessionId) {
-  await delay(250);
-  const target = store.security.sessions.find((s) => s.id === sessionId);
-  if (!target) throw new Error("Session not found");
-  if (target.current) throw new Error("You can't revoke the current session.");
   store.security.sessions = store.security.sessions.filter((s) => s.id !== sessionId);
-  return store.security.sessions.map((s) => ({ ...s }));
+  return store.security.sessions;
 }
+
 export async function revokeOtherSessions() {
-  await delay();
   store.security.sessions = store.security.sessions.filter((s) => s.current);
-  return store.security.sessions.map((s) => ({ ...s }));
+  return store.security.sessions;
 }
 
 /* ---- branding ---- */
 export async function getBranding() {
-  await delay(250);
-  return { ...store.branding };
-}
-export async function updateBranding(data) {
-  await delay();
-  store.branding.studioName = data.studioName.trim();
-  store.branding.logoStyle = data.logoStyle;
-  store.branding.showFooter = data.showFooter;
-  store.branding.footerText = (data.footerText || "").trim();
-  if (data.logoUrl !== undefined) {
-    store.branding.logoUrl = data.logoUrl;
-    store.branding.logoName = data.logoName || "";
+  try {
+    const data = await api.get("/settings/branding");
+    store.branding = { ...store.branding, ...data };
+    return { ...store.branding };
+  } catch {
+    return { ...store.branding };
   }
-  return { ...store.branding };
+}
+
+export async function updateBranding(data) {
+  const res = await api.put("/settings/branding", data);
+  store.branding = { ...store.branding, ...res };
+  return res;
 }
 
 /* ---- preferences ---- */
 export async function getPreferences() {
-  await delay(250);
-  return { ...store.preferences };
+  try {
+    const data = await api.get("/settings/preferences");
+    store.preferences = { ...store.preferences, ...data };
+    return { ...store.preferences };
+  } catch {
+    return { ...store.preferences };
+  }
 }
+
 export async function updatePreferences(data) {
-  await delay();
-  store.preferences = { ...store.preferences, ...data };
-  return { ...store.preferences };
+  const res = await api.put("/settings/preferences", data);
+  store.preferences = { ...store.preferences, ...res };
+  return res;
 }

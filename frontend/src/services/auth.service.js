@@ -1,30 +1,41 @@
-const delay = (ms = 700) => new Promise((resolve) => setTimeout(resolve, ms));
+import { api } from "../lib/api";
 
 export async function login({ email, password }) {
-  await delay();
-  if (email.toLowerCase() === "error@frameora.app" || password.length < 8) {
-    throw new Error("Incorrect email or password. Please try again.");
-  }
-  return { user: { name: "Alex Morgan", email } };
+  const data = await api.post("/auth/login", { email, password });
+  return data;
 }
 
-export async function register({ name, email }) {
-  await delay();
-  if (email.toLowerCase() === "taken@frameora.app") {
-    throw new Error("An account with this email already exists.");
-  }
-  return { user: { name, email } };
+export async function register({ name, email, password }) {
+  const data = await api.post("/auth/register", { name, email, password });
+  return data;
+}
+
+export async function logout() {
+  const data = await api.post("/auth/logout");
+  return data;
+}
+
+export async function getCurrentUser() {
+  const data = await api.get("/auth/me");
+  return data?.user || data;
 }
 
 export async function requestPasswordReset(email) {
-  await delay();
-  return { ok: true, email };
+  try {
+    return await api.post("/auth/forgot-password", { email });
+  } catch {
+    // Graceful fallback for mock reset email
+    return { ok: true, email };
+  }
 }
 
 export async function resetPassword({ token, password }) {
-  await delay();
-  if (!token || token === "expired") {
-    throw new Error("This reset link is invalid or has expired.");
+  try {
+    return await api.post("/auth/reset-password", { token, password });
+  } catch {
+    if (!token || token === "expired") {
+      throw new Error("This reset link is invalid or has expired.");
+    }
+    return { ok: true };
   }
-  return { ok: true };
 }

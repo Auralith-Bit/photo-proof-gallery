@@ -42,10 +42,12 @@ export default function PhotosTab({ albumId }) {
         setUploadQueue((prev) =>
           prev.map((u) => (u.id === item.id ? { ...u, status: "completed", progress: 100 } : u))
         );
-      } catch {
+      } catch (err) {
+        console.error("Upload error:", err);
         setUploadQueue((prev) =>
           prev.map((u) => (u.id === item.id ? { ...u, status: "failed" } : u))
         );
+        toast.error(err?.message || "Upload failed. Please try again.");
       }
     }
 

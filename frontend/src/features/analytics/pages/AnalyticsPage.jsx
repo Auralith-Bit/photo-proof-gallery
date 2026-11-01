@@ -71,19 +71,18 @@ export default function AnalyticsPage() {
         </div>
       </header>
 
-      {/* Honesty banner: this build has no backend, so all figures are sample data. */}
-      <InlineAlert tone="info">
-        <span className="flex items-start gap-2">
-          <Info size={16} className="mt-0.5 shrink-0" aria-hidden="true" />
-          <span>
-            <strong className="font-semibold">Sample data.</strong> This is a frontend
-            demonstration build with no MERN backend connected, so the activity metrics and trends
-            below are generated sample figures — not live studio data. Connect your backend to see
-            real aggregates. Metrics the system does not yet track are shown as{" "}
-            <em>Requires backend tracking</em> rather than estimated.
+      {/* Honesty banner: only shown if sample data is returned */}
+      {analyticsQuery.data?.sample && (
+        <InlineAlert tone="info">
+          <span className="flex items-start gap-2">
+            <Info size={16} className="mt-0.5 shrink-0" aria-hidden="true" />
+            <span>
+              <strong className="font-semibold">Sample data.</strong> The activity metrics and trends
+              below are generated sample figures. Connect your backend to see live studio data.
+            </span>
           </span>
-        </span>
-      </InlineAlert>
+        </InlineAlert>
+      )}
 
       <AnalyticsFilterBar
         preset={preset}
