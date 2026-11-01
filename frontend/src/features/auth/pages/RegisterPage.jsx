@@ -2,14 +2,15 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import AuthLayout from "../../../app/layouts/AuthLayout";
 import Input from "../../../components/ui/Input";
 import PasswordInput from "../../../components/ui/PasswordInput";
-import Checkbox from "../../../components/ui/checkbox";
+import Checkbox from "../../../components/ui/Checkbox";
 import Button from "../../../components/ui/Button";
 import InlineAlert from "../../../components/ui/InlineAlert";
 import { register as registerUser } from "../../../services/auth.service";
+import { useAuth } from "../../../hooks/useAuth";
 import { toast } from "../../../stores/toastStore";
 
 const emailField = z
@@ -38,6 +39,8 @@ const schema = z
 
 export default function RegisterPage() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const { signIn } = useAuth();
   const [formError, setFormError] = useState("");
   const {
     register,
@@ -45,12 +48,15 @@ export default function RegisterPage() {
     formState: { errors, isSubmitting },
   } = useForm({ resolver: zodResolver(schema), defaultValues: { accept: false } });
 
+  const from = location.state?.from?.pathname || "/dashboard";
+
   async function onSubmit(values) {
     setFormError("");
     try {
-      await registerUser(values);
-      toast.success("Your studio workspace is ready.", "Welcome to Frameora");
-      navigate("/dashboard");
+      const { user } = await registerUser(values);
+      signIn(user);
+      toast.success("Your studio workspace is ready.", `Welcome, ${user.name.split(" ")[0]}`);
+      navigate(from, { replace: true });
     } catch (error) {
       setFormError(error.message);
     }

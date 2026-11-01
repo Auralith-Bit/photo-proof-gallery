@@ -1,6 +1,8 @@
-import { useQuery } from "@tanstack/react-query";
-import { getUser } from "../services/user.service";
+import { useAuth } from "./useAuth";
 
+// The current user IS the authenticated session — no separate request needed.
+// Returns the same { data } shape the Dashboard already consumes.
 export function useUser() {
-  return useQuery({ queryKey: ["user"], queryFn: getUser });
+  const { user } = useAuth();
+  return { data: user, isLoading: false, isError: false };
 }

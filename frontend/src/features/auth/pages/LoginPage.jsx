@@ -2,13 +2,14 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import AuthLayout from "../../../app/layouts/AuthLayout";
 import Input from "../../../components/ui/Input";
 import PasswordInput from "../../../components/ui/PasswordInput";
 import Button from "../../../components/ui/Button";
 import InlineAlert from "../../../components/ui/InlineAlert";
 import { login } from "../../../services/auth.service";
+import { useAuth } from "../../../hooks/useAuth";
 
 const emailField = z
   .string()
@@ -22,6 +23,8 @@ const schema = z.object({
 
 export default function LoginPage() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const { signIn } = useAuth();
   const [formError, setFormError] = useState("");
   const {
     register,
@@ -29,11 +32,14 @@ export default function LoginPage() {
     formState: { errors, isSubmitting },
   } = useForm({ resolver: zodResolver(schema) });
 
+  const from = location.state?.from?.pathname || "/dashboard";
+
   async function onSubmit(values) {
     setFormError("");
     try {
-      await login(values);
-      navigate("/dashboard");
+      const { user } = await login(values);
+      signIn(user);
+      navigate(from, { replace: true });
     } catch (error) {
       setFormError(error.message);
     }

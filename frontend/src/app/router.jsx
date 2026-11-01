@@ -2,6 +2,8 @@ import { createBrowserRouter, Navigate, RouterProvider } from "react-router-dom"
 import WorkspaceLayout from "./layouts/WorkspaceLayout";
 import ClientLayout from "./layouts/ClientsLayout";
 import ErrorBoundary from "./ErrorBoundary";
+import RequireAuth from "./guards/RequireAuth";
+import RedirectIfAuthed from "./guards/RedirectIfAuthed";
 import PlaceholderPage from "../components/shared/PlaceholderPage";
 import NotFoundPage from "../components/shared/NotFoundPage";
 import MarketingPage from "../features/marketing/pages/MarketingPage";
@@ -34,7 +36,11 @@ import ClientGalleryPage from "../features/client-access/pages/ClientGalleryPage
 const router = createBrowserRouter([
   { path: "/", element: <MarketingPage /> },
   {
-    element: <WorkspaceLayout />,
+    element: (
+      <RequireAuth>
+        <WorkspaceLayout />
+      </RequireAuth>
+    ),
     children: [
       { path: "/dashboard", element: <DashboardPage /> },
       { path: "/albums", element: <AlbumsPage /> },
@@ -67,10 +73,10 @@ const router = createBrowserRouter([
       },
     ],
   },
-  { path: "/login", element: <LoginPage /> },
-  { path: "/register", element: <RegisterPage /> },
-  { path: "/forgot-password", element: <ForgotPasswordPage /> },
-  { path: "/reset-password", element: <ResetPasswordPage /> },
+  { path: "/login", element: <RedirectIfAuthed><LoginPage /></RedirectIfAuthed> },
+  { path: "/register", element: <RedirectIfAuthed><RegisterPage /></RedirectIfAuthed> },
+  { path: "/forgot-password", element: <RedirectIfAuthed><ForgotPasswordPage /></RedirectIfAuthed> },
+  { path: "/reset-password", element: <RedirectIfAuthed><ResetPasswordPage /></RedirectIfAuthed> },
   {
     element: <ClientLayout />,
     children: [

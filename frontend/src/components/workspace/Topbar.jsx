@@ -10,18 +10,29 @@ import {
   DropdownMenuSeparator,
 } from "../ui/DropdownMenu";
 import { useUiStore } from "../../stores/uiStore";
+import { useAuth } from "../../hooks/useAuth";
+import { getInitials } from "../../lib/formatters";
 import Breadcrumbs from "./Breadcrumbs";
 
 export default function Topbar() {
   const navigate = useNavigate();
   const [query, setQuery] = useState("");
+  const { user, signOut } = useAuth();
   const toggleSidebar = useUiStore((s) => s.toggleSidebar);
   const setDrawerOpen = useUiStore((s) => s.setMobileDrawerOpen);
+
+  const displayName = user?.name || "Photographer";
+  const initials = getInitials(displayName) || "P";
 
   function handleSearch(event) {
     event.preventDefault();
     const term = query.trim();
     if (term) navigate(`/albums?q=${encodeURIComponent(term)}`);
+  }
+
+  function handleSignOut() {
+    signOut();
+    navigate("/", { replace: true });
   }
 
   return (
@@ -80,19 +91,26 @@ export default function Topbar() {
             trigger={
               <button
                 type="button"
-                aria-label="Account menu"
+                aria-label={`Account menu for ${displayName}`}
                 className="flex h-9 w-9 items-center justify-center rounded-full bg-olive text-sm font-semibold text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-olive/60 focus-visible:ring-offset-2 focus-visible:ring-offset-ivory"
               >
-                FP
+                {initials}
               </button>
             }
           >
-            <DropdownMenuLabel>Signed in as Photographer</DropdownMenuLabel>
+            <DropdownMenuLabel>
+              Signed in as {displayName}
+              {user?.email ? (
+                <span className="mt-0.5 block truncate text-[12px] font-normal text-charcoal/50">
+                  {user.email}
+                </span>
+              ) : null}
+            </DropdownMenuLabel>
             <DropdownMenuItem onSelect={() => navigate("/settings/profile")}>Profile</DropdownMenuItem>
             <DropdownMenuItem onSelect={() => navigate("/settings/branding")}>Studio Branding</DropdownMenuItem>
             <DropdownMenuItem onSelect={() => navigate("/settings/security")}>Security</DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onSelect={() => navigate("/login")}>Sign Out</DropdownMenuItem>
+            <DropdownMenuItem onSelect={handleSignOut}>Sign Out</DropdownMenuItem>
           </DropdownMenu>
         </div>
       </div>
