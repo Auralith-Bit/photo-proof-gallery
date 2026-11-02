@@ -76,7 +76,7 @@ const router = createBrowserRouter([
   { path: "/login", element: <RedirectIfAuthed><LoginPage /></RedirectIfAuthed> },
   { path: "/register", element: <RedirectIfAuthed><RegisterPage /></RedirectIfAuthed> },
   { path: "/forgot-password", element: <RedirectIfAuthed><ForgotPasswordPage /></RedirectIfAuthed> },
-  { path: "/reset-password", element: <RedirectIfAuthed><ResetPasswordPage /></RedirectIfAuthed> },
+  { path: "/reset-password", element: <ResetPasswordPage /> },
   {
     element: <ClientLayout />,
     children: [

@@ -1,6 +1,8 @@
+import crypto from "crypto";
 import bcrypt from "bcryptjs";
 import User from "../models/User.js";
 import generateToken from "../utils/jwt.js";
+import { sendPasswordResetEmail, sendWelcomeEmail, sendLoginNotificationEmail } from "../utils/email.js";
 
 const registerUser = async ({ name, email, password }) => {
   if (!name?.trim() || !email?.trim() || !password) {
@@ -47,6 +49,12 @@ const registerUser = async ({ name, email, password }) => {
     role: user.role,
   });
 
+  // Send welcome email asynchronously
+  sendWelcomeEmail({
+    to: user.email,
+    name: user.name,
+  }).catch((err) => console.error("Welcome email error:", err.message));
+
   return {
     token,
     user: {
@@ -58,7 +66,7 @@ const registerUser = async ({ name, email, password }) => {
   };
 };
 
-const loginUser = async ({email, password}) => {
+const loginUser = async ({ email, password, ip }) => {
   if (!email?.trim() || !password) {
     const error = new Error("Enter email and password.");
     error.statusCode = 400;
@@ -83,6 +91,17 @@ const loginUser = async ({email, password}) => {
     userId: user._id.toString(),
     role: user.role,
   });
+
+  // Send login notification email if enabled (default true)
+  if (user.settings?.security?.notifyOnNewDevice !== false) {
+    sendLoginNotificationEmail({
+      to: user.email,
+      name: user.settings?.profile?.displayName || user.name,
+      ip,
+      time: new Date().toUTCString(),
+    }).catch((err) => console.error("Login alert email error:", err.message));
+  }
+
   return {
     token,
     user: {
@@ -110,28 +129,94 @@ const getCurrentUser = async (userId) => {
   };
 };
 
+/**
+ * Priority 1 & 3 — Generates a real reset token, saves it hashed to DB,
+ * and sends the reset email via Nodemailer.
+ */
 const forgotPassword = async (email) => {
   if (!email?.trim()) {
     const error = new Error("Email is required.");
     error.statusCode = 400;
     throw error;
   }
-  const user = await User.findOne({ email: email.trim().toLowerCase() });
-  // Always return ok for security/privacy
-  return { ok: true, email: email.trim().toLowerCase() };
+
+  const normalizedEmail = email.trim().toLowerCase();
+  const user = await User.findOne({ email: normalizedEmail });
+
+  // Always return ok — never reveal whether the email exists (security best practice)
+  if (!user) {
+    return { ok: true };
+  }
+
+  // Generate a secure random token and store its hash in the DB
+  const rawToken = crypto.randomBytes(32).toString("hex");
+  const hashedToken = crypto.createHash("sha256").update(rawToken).digest("hex");
+
+  user.resetPasswordToken = hashedToken;
+  user.resetPasswordExpires = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
+  await user.save();
+
+  // Send the email — if it fails, clear the token so the user can retry
+  try {
+    await sendPasswordResetEmail({
+      to: user.email,
+      name: user.settings?.profile?.displayName || user.name,
+      token: rawToken,
+    });
+  } catch (emailErr) {
+    console.error("Failed to send reset email:", emailErr.message);
+    user.resetPasswordToken = undefined;
+    user.resetPasswordExpires = undefined;
+    await user.save();
+    const error = new Error(
+      "Could not send the reset email. Please check your email configuration and try again."
+    );
+    error.statusCode = 500;
+    throw error;
+  }
+
+  return { ok: true };
 };
 
+/**
+ * Priority 3 — Actually verifies the token against the DB and saves the new password.
+ */
 const resetPassword = async ({ token, password }) => {
   if (!password || password.length < 8) {
     const error = new Error("Password must be at least 8 characters.");
     error.statusCode = 400;
     throw error;
   }
-  if (!token || token === "expired") {
+
+  if (!token) {
     const error = new Error("This reset link is invalid or has expired.");
     error.statusCode = 400;
     throw error;
   }
+
+  // Hash the incoming raw token to compare with what we stored
+  const hashedToken = crypto.createHash("sha256").update(token).digest("hex");
+
+  const user = await User.findOne({
+    resetPasswordToken: hashedToken,
+    resetPasswordExpires: { $gt: new Date() },
+  });
+
+  if (!user) {
+    const error = new Error("This reset link is invalid or has expired.");
+    error.statusCode = 400;
+    throw error;
+  }
+
+  // Save the new password and clear the token
+  user.password = await bcrypt.hash(password, 12);
+  user.resetPasswordToken = undefined;
+  user.resetPasswordExpires = undefined;
+  if (!user.settings) user.settings = {};
+  if (!user.settings.security) user.settings.security = {};
+  user.settings.security.passwordUpdatedAt = new Date();
+  await user.save();
+
   return { ok: true, message: "Password reset successful." };
 };
 

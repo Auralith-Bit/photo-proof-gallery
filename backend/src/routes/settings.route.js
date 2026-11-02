@@ -1,6 +1,7 @@
 import express from "express";
 import settingsController from "../controllers/settings.controller.js";
 import authMiddleware from "../middlewares/auth.middleware.js";
+import { uploadSingleImage } from "../middlewares/upload.middleware.js";
 
 const router = express.Router();
 
@@ -18,5 +19,6 @@ router.put("/security", settingsController.updateSecurity);
 router.post("/change-password", settingsController.changePassword);
 router.get("/storage", settingsController.getStorage);
 router.get("/activity", settingsController.getActivity);
+router.post("/upload-image", uploadSingleImage, settingsController.uploadImage);
 
 export default router;

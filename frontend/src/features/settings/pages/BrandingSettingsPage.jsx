@@ -9,6 +9,7 @@ import Textarea from "../../../components/ui/Textarea";
 import Switch from "../../../components/ui/Switch";
 import Skeleton from "../../../components/ui/Skeleton";
 import ImageUpload from "../../../components/ui/ImageUpload";
+import { uploadSettingsImage } from "../../../services/settings.service";
 import SaveBar from "../../../components/settings/SaveBar";
 import BrandingPreview from "../../../components/settings/BrandingPreview";
 import { useBranding, useUpdateBranding } from "../../../hooks/useSettings";
@@ -90,6 +91,8 @@ function BrandingForm({ branding }) {
             <ImageUpload
               label="Upload logo"
               value={values.logo}
+              uploadFn={uploadSettingsImage}
+              uploadType="logo"
               onChange={(v) => setValue("logo", v, { shouldDirty: true })}
             />
             <div className="flex flex-col gap-2">

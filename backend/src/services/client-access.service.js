@@ -42,7 +42,7 @@ const resolveAlbumByToken = async (token) => {
 const verifyAlbumAccess = async (token, password) => {
   const album = await Album.findOne({ accessToken: token })
     .select("+password")
-    .populate("photographer", "name email");
+    .populate("photographer", "name email settings");
 
   if (!album) {
     throw createAccessError("INVALID_LINK", "This link doesn't look right.", 404);
@@ -91,14 +91,19 @@ const verifyAlbumAccess = async (token, password) => {
 
   const photos = await Photo.find({ albumId: album._id }).sort({ createdAt: 1 });
 
+  const pg = album.photographer;
+  const pgBranding = pg?.settings?.branding || {};
+  const currentYear = new Date().getFullYear();
+  const fallbackStudioName = pg?.name ? `${pg.name} Photography` : "Photo Studio";
+
   const branding = {
-    studioName: album.photographer?.name
-      ? `${album.photographer.name} Photography`
-      : "Frameora Studio",
-    logoUrl: null,
-    logoStyle: "dark",
-    showFooter: true,
-    footerText: `© ${new Date().getFullYear()} All rights reserved.`,
+    studioName: pgBranding.studioName || fallbackStudioName,
+    logoUrl: pgBranding.logoUrl || null,
+    logoStyle: pgBranding.logoStyle || "both",
+    showFooter: pgBranding.showFooter !== false,
+    footerText:
+      pgBranding.footerText ||
+      `© ${currentYear} ${pgBranding.studioName || fallbackStudioName} — All rights reserved.`,
   };
 
   return {

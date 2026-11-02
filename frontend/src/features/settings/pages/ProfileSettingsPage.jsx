@@ -8,8 +8,8 @@ import Input from "../../../components/ui/Input";
 import Badge from "../../../components/ui/Badge";
 import Button from "../../../components/ui/Button";
 import Skeleton from "../../../components/ui/Skeleton";
-import Avatar from "../../../components/ui/Avatar";
 import ImageUpload from "../../../components/ui/ImageUpload";
+import { uploadSettingsImage } from "../../../services/settings.service";
 import SaveBar from "../../../components/settings/SaveBar";
 import { useProfile, useUpdateProfile, useResendVerification } from "../../../hooks/useSettings";
 import { useSaveStatus } from "../../../hooks/useSaveStatus";
@@ -17,7 +17,6 @@ import { useSettingsDirtyStore } from "../../../stores/settingsDirtyStore";
 
 const schema = z.object({
   displayName: z.string().min(2, "Enter your display name."),
-  email: z.string().min(1, "Email is required.").email("Enter a valid email address."),
   image: z.object({ name: z.string(), url: z.string() }).nullable(),
 });
 
@@ -37,7 +36,6 @@ function ProfileForm({ profile }) {
     resolver: zodResolver(schema),
     defaultValues: {
       displayName: profile.displayName,
-      email: profile.email,
       image: profile.imageUrl ? { name: profile.imageName, url: profile.imageUrl } : null,
     },
   });
@@ -52,7 +50,7 @@ function ProfileForm({ profile }) {
     update.mutate(
       {
         displayName: values.displayName,
-        email: values.email,
+        email: profile.email,
         imageUrl: values.image?.url ?? null,
         imageName: values.image?.name ?? "",
       },
@@ -69,18 +67,20 @@ function ProfileForm({ profile }) {
 
       <Card className="flex flex-col gap-6">
         <div className="flex flex-wrap items-center gap-4">
-          <Avatar src={image?.url} name={watch("displayName")} size="lg" />
           <ImageUpload
             round
             label="Upload photo"
+            name={watch("displayName")}
             value={image}
+            uploadFn={uploadSettingsImage}
+            uploadType="avatar"
             onChange={(v) => setValue("image", v, { shouldDirty: true })}
           />
         </div>
 
         <div className="grid gap-5 sm:grid-cols-2">
           <Input label="Display name" required error={errors.displayName?.message} {...register("displayName")} />
-          <Input label="Email" type="email" required error={errors.email?.message} {...register("email")} />
+          <Input label="Email" type="email" readOnly disabled value={profile.email} />
         </div>
 
         <div className="flex flex-wrap items-center justify-between gap-3 rounded-control border border-sand bg-ivory px-4 py-3">

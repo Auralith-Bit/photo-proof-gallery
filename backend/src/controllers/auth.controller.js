@@ -45,7 +45,8 @@ const registerUser = async (req, res) => {
 
 const loginUser = async (req, res) => {
   try {
-    const result = await authServices.loginUser(req.body);
+    const clientIp = req.ip || req.headers["x-forwarded-for"] || req.socket.remoteAddress;
+    const result = await authServices.loginUser({ ...req.body, ip: clientIp });
 
     res.cookie("token", result.token, cookieOptions);
 

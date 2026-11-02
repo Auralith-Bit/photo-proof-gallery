@@ -1,4 +1,5 @@
 import settingsService from "../services/settings.service.js";
+import { getCloudinary } from "../config/cloudinary.js";
 
 const handleError = (res, error, defaultMsg) => {
   if (error.statusCode) {
@@ -122,6 +123,45 @@ const getActivity = async (req, res) => {
   }
 };
 
+/**
+ * Priority 2 — Uploads a profile avatar or branding logo to Cloudinary.
+ * Accepts multipart/form-data with a single image file.
+ * Query: ?type=avatar | logo
+ */
+const uploadImage = async (req, res) => {
+  try {
+    const file = req.file;
+    if (!file || !file.buffer) {
+      return res.status(400).json({ success: false, message: "No image file provided." });
+    }
+
+    const type = req.query.type === "logo" ? "logos" : "avatars";
+    const cld = getCloudinary();
+
+    const result = await new Promise((resolve, reject) => {
+      const stream = cld.uploader.upload_stream(
+        {
+          folder: `photostudio/${type}`,
+          resource_type: "image",
+          transformation: type === "avatars"
+            ? [{ width: 400, height: 400, crop: "fill", gravity: "face", quality: "auto", fetch_format: "auto" }]
+            : [{ width: 600, quality: "auto", fetch_format: "auto" }],
+        },
+        (error, result) => (error ? reject(error) : resolve(result))
+      );
+      stream.end(file.buffer);
+    });
+
+    return res.status(200).json({
+      url: result.secure_url,
+      publicId: result.public_id,
+    });
+  } catch (err) {
+    console.error("Image upload error:", err.message);
+    return res.status(502).json({ success: false, message: "Image upload failed. Check Cloudinary configuration." });
+  }
+};
+
 export default {
   getSettings,
   getProfile,
@@ -135,4 +175,5 @@ export default {
   changePassword,
   getStorage,
   getActivity,
+  uploadImage,
 };

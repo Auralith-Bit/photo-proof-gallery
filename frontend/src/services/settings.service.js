@@ -134,3 +134,27 @@ export async function updatePreferences(data) {
   store.preferences = { ...store.preferences, ...res };
   return res;
 }
+
+/**
+ * Priority 2 — Uploads an avatar or logo image to the backend (→ Cloudinary).
+ * Returns { url, publicId } with a persistent CDN URL.
+ * @param {File} file  - The raw File object from the browser
+ * @param {"avatar"|"logo"} type
+ */
+export async function uploadSettingsImage(file, type = "avatar") {
+  const form = new FormData();
+  form.append("image", file);
+  const res = await fetch(
+    `${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/settings/upload-image?type=${type}`,
+    {
+      method: "POST",
+      credentials: "include",
+      body: form,
+    }
+  );
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.message || "Image upload failed.");
+  }
+  return res.json(); // { url, publicId }
+}

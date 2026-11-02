@@ -13,6 +13,7 @@ import {
 import { useUiStore } from "../../stores/uiStore";
 import { useUser } from "../../hooks/useUser";
 import { useAuth } from "../../hooks/useAuth";
+import { useProfile } from "../../hooks/useSettings";
 import { logout } from "../../services/auth.service";
 import Breadcrumbs from "./Breadcrumbs";
 
@@ -38,6 +39,10 @@ export default function Topbar() {
   const currentUser = userData || authUser;
   const displayName = currentUser?.name || "Photographer";
   const initials = getInitials(displayName) || "P";
+
+  // Load the full profile to get the avatar imageUrl
+  const { data: profile } = useProfile();
+  const avatarUrl = profile?.imageUrl || null;
 
   function handleSearch(event) {
     event.preventDefault();
@@ -114,9 +119,17 @@ export default function Topbar() {
               <button
                 type="button"
                 aria-label={`Account menu for ${displayName}`}
-                className="flex h-9 w-9 items-center justify-center rounded-full bg-olive text-sm font-semibold text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-olive/60 focus-visible:ring-offset-2 focus-visible:ring-offset-ivory"
+                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-olive text-sm font-semibold text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-olive/60 focus-visible:ring-offset-2 focus-visible:ring-offset-ivory overflow-hidden"
               >
-                {initials}
+                {avatarUrl ? (
+                  <img
+                    src={avatarUrl}
+                    alt={displayName}
+                    className="h-full w-full object-cover"
+                  />
+                ) : (
+                  initials
+                )}
               </button>
             }
           >

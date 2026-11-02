@@ -30,21 +30,9 @@ export async function getCurrentUser() {
 }
 
 export async function requestPasswordReset(email) {
-  try {
-    return await api.post("/auth/forgot-password", { email });
-  } catch {
-    // Graceful fallback — avoid exposing whether an email exists
-    return { ok: true, email };
-  }
+  return await api.post("/auth/forgot-password", { email });
 }
 
 export async function resetPassword({ token, password }) {
-  try {
-    return await api.post("/auth/reset-password", { token, password });
-  } catch {
-    if (!token || token === "expired") {
-      throw new Error("This reset link is invalid or has expired.");
-    }
-    return { ok: true };
-  }
+  return await api.post("/auth/reset-password", { token, password });
 }

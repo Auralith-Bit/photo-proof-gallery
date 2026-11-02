@@ -18,6 +18,7 @@ const schema = z.object({ email: emailField });
 
 export default function ForgotPasswordPage() {
   const [sentTo, setSentTo] = useState("");
+  const [formError, setFormError] = useState("");
   const {
     register,
     handleSubmit,
@@ -25,8 +26,13 @@ export default function ForgotPasswordPage() {
   } = useForm({ resolver: zodResolver(schema) });
 
   async function onSubmit(values) {
-    await requestPasswordReset(values.email);
-    setSentTo(values.email);
+    setFormError("");
+    try {
+      await requestPasswordReset(values.email);
+      setSentTo(values.email);
+    } catch (err) {
+      setFormError(err.message || "Failed to send reset link. Please try again.");
+    }
   }
 
   if (sentTo) {
@@ -57,6 +63,7 @@ export default function ForgotPasswordPage() {
       subtitle="Enter your account email and we'll send a reset link."
     >
       <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4" noValidate>
+        {formError && <InlineAlert tone="error">{formError}</InlineAlert>}
         <Input
           label="Email"
           type="email"
