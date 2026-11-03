@@ -96,12 +96,13 @@ const CLIENT_STEPS = [
 const linkPrimary =
   "inline-flex h-10 items-center justify-center gap-2 rounded-control bg-charcoal px-4 text-sm font-medium text-white transition-colors hover:bg-charcoal/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-olive/60 focus-visible:ring-offset-2 focus-visible:ring-offset-ivory";
 const linkPrimaryLg = linkPrimary.replace("h-10", "h-12").replace("px-4 text-sm", "px-5 text-base");
+// CTA-band pair (compact): filled olive + white outline, mirroring the reference layout.
 const linkOliveLg =
-  "inline-flex h-12 items-center justify-center gap-2 rounded-control bg-olive px-5 text-base font-medium text-white transition-colors hover:bg-olive/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:ring-offset-2 focus-visible:ring-offset-charcoal";
+  "inline-flex h-10 items-center justify-center gap-2 rounded-control bg-olive px-4 text-sm font-medium text-white transition-colors hover:bg-olive/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:ring-offset-2 focus-visible:ring-offset-charcoal";
 const linkGhost =
   "rounded-control px-3 py-2 text-sm font-medium text-charcoal/70 hover:text-charcoal focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-olive/60";
-const linkWhiteGhost =
-  "rounded-control px-5 py-3 text-sm font-medium text-white/80 underline-offset-4 hover:text-white hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50";
+const linkOutlineDark =
+  "inline-flex h-10 items-center justify-center gap-2 rounded-control border border-white/25 px-4 text-sm font-medium text-white transition-colors hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:ring-offset-2 focus-visible:ring-offset-charcoal";
 
 function scrollToFeatures() {
   const el = document.getElementById("features");
@@ -349,34 +350,36 @@ export default function MarketingPage() {
           </div>
         </section>
 
-        {/* Final CTA — the one dark band */}
+        {/* Final CTA — horizontal band: text left, buttons right; all original copy preserved */}
         <section className="bg-charcoal">
-          <div className="mx-auto flex max-w-[1200px] flex-col items-center gap-6 px-4 py-20 text-center md:px-8 md:py-28">
-            <Aperture size={30} className="text-gold" aria-hidden="true" />
-            <h2 className="max-w-2xl font-serif text-3xl leading-tight text-white md:text-4xl">
-              {isAuthenticated ? "Your studio is ready when you are" : "Ready to preserve every moment?"}
-            </h2>
-            <p className="max-w-md text-[15px] leading-7 text-white/70">
-              {isAuthenticated
-                ? "Jump back into your workspace to manage albums, uploads, and client galleries."
-                : "Set up your studio, create your first album, and share a private gallery in minutes."}
-            </p>
-            <div className="mt-2 flex flex-wrap items-center justify-center gap-3">
+          <div className="mx-auto flex max-w-[1200px] flex-col gap-6 px-5 py-10 md:flex-row md:items-center md:justify-between md:gap-10 md:px-12 md:py-12">
+            <div className="md:max-w-2xl">
+              <h2 className="font-serif text-[28px] leading-[1.12] text-white md:text-[34px]">
+                {isAuthenticated ? "Your studio is ready when you are" : "Ready to preserve every moment?"}
+              </h2>
+              <p className="mt-3 max-w-xl text-[15px] leading-7 text-white/65">
+                {isAuthenticated
+                  ? "Jump back into your workspace to manage albums, uploads, and client galleries."
+                  : "Set up your studio, create your first album, and share a private gallery in minutes."}
+              </p>
+            </div>
+
+            <div className="flex shrink-0 flex-wrap items-center gap-3">
               {isAuthenticated ? (
                 <>
                   <Link to="/dashboard" className={linkOliveLg}>
-                    Open your workspace <ArrowRight size={16} aria-hidden="true" />
+                    Open your workspace <ArrowRight size={15} aria-hidden="true" />
                   </Link>
-                  <button type="button" onClick={handleSignOut} className={linkWhiteGhost}>
+                  <button type="button" onClick={handleSignOut} className={linkOutlineDark}>
                     Sign out of this device
                   </button>
                 </>
               ) : (
                 <>
                   <Link to="/register" className={linkOliveLg}>
-                    Get Started <ArrowRight size={16} aria-hidden="true" />
+                    Get Started <ArrowRight size={15} aria-hidden="true" />
                   </Link>
-                  <Link to="/login" className={linkWhiteGhost}>
+                  <Link to="/login" className={linkOutlineDark}>
                     Sign in to your workspace
                   </Link>
                 </>
