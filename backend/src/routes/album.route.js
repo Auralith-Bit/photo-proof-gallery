@@ -16,6 +16,7 @@ router.patch("/:id", albumController.updateAlbum);
 router.delete("/:id", albumController.deleteAlbum);
 
 router.post("/:id/archive", albumController.archiveAlbum);
+router.post("/:id/draft", albumController.draftAlbum);
 router.post("/:id/restore", albumController.restoreAlbum);
 
 router.patch("/:id/access", albumController.setAccessEnabled);

@@ -11,18 +11,21 @@ import {
   RotateCcw,
   Share2,
   Trash2,
+  FileEdit,
 } from "lucide-react";
 import IconButton from "../ui/IconButton";
 import ConfirmDialog from "../ui/ConfirmDialog";
 import { DropdownMenu, DropdownMenuItem, DropdownMenuSeparator } from "../ui/DropdownMenu";
-import { useArchiveAlbum, useRestoreAlbum, useDeleteAlbum } from "../../hooks/useAlbums";
+import { useArchiveAlbum, useDraftAlbum, useRemoveFromDraftAlbum, useRestoreAlbum, useDeleteAlbum } from "../../hooks/useAlbums";
 import { buildAlbumLink, downloadAlbumQr } from "../../lib/sharing";
 import { toast } from "../../stores/toastStore";
 
 export default function AlbumActionsMenu({ album, variant = "card" }) {
   const navigate = useNavigate();
   const archiveMutation = useArchiveAlbum();
+  const draftMutation = useDraftAlbum();
   const restoreMutation = useRestoreAlbum();
+  const removeFromDraftMutation = useRemoveFromDraftAlbum();
   const deleteMutation = useDeleteAlbum();
   const [confirmOpen, setConfirmOpen] = useState(false);
 
@@ -81,10 +84,19 @@ export default function AlbumActionsMenu({ album, variant = "card" }) {
           <DropdownMenuItem onSelect={() => restoreMutation.mutate(album.id)}>
             <RotateCcw size={14} aria-hidden="true" /> Restore
           </DropdownMenuItem>
-        ) : (
-          <DropdownMenuItem onSelect={() => archiveMutation.mutate(album.id)}>
-            <Archive size={14} aria-hidden="true" /> Archive
+        ) : album.status === "draft" ? (
+          <DropdownMenuItem onSelect={() => removeFromDraftMutation.mutate(album.id)}>
+            <RotateCcw size={14} aria-hidden="true" /> Remove from Draft
           </DropdownMenuItem>
+        ) : (
+          <>
+            <DropdownMenuItem onSelect={() => draftMutation.mutate(album.id)}>
+              <FileEdit size={14} aria-hidden="true" /> Move to Draft
+            </DropdownMenuItem>
+            <DropdownMenuItem onSelect={() => archiveMutation.mutate(album.id)}>
+              <Archive size={14} aria-hidden="true" /> Archive
+            </DropdownMenuItem>
+          </>
         )}
         <DropdownMenuItem danger onSelect={() => setConfirmOpen(true)}>
           <Trash2 size={14} aria-hidden="true" /> Delete

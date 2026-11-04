@@ -3,6 +3,7 @@ import {
   getAlbums,
   getAlbumById,
   archiveAlbum,
+  draftAlbum,
   restoreAlbum,
   deleteAlbum,
   createAlbum,
@@ -36,6 +37,14 @@ function useAlbumMutation(mutationFn, successMessage) {
 
 export function useArchiveAlbum() {
   return useAlbumMutation(archiveAlbum, (album) => `"${album.title}" was archived.`);
+}
+
+export function useDraftAlbum() {
+  return useAlbumMutation(draftAlbum, (album) => `"${album.title}" was moved to draft.`);
+}
+
+export function useRemoveFromDraftAlbum() {
+  return useAlbumMutation(restoreAlbum, (album) => `"${album.title}" was moved back to active.`);
 }
 
 export function useRestoreAlbum() {

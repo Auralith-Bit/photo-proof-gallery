@@ -20,6 +20,10 @@ export async function archiveAlbum(albumId) {
   return await api.post(`/albums/${albumId}/archive`);
 }
 
+export async function draftAlbum(albumId) {
+  return await api.post(`/albums/${albumId}/draft`);
+}
+
 export async function restoreAlbum(albumId) {
   return await api.post(`/albums/${albumId}/restore`);
 }

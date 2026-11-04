@@ -60,6 +60,15 @@ const archiveAlbum = async (req, res) => {
   }
 };
 
+const draftAlbum = async (req, res) => {
+  try {
+    const album = await albumService.draftAlbum(req.params.id, req.user.userId);
+    return res.status(200).json(album);
+  } catch (error) {
+    return handleError(res, error, "Draft Album Error:");
+  }
+};
+
 const restoreAlbum = async (req, res) => {
   try {
     const album = await albumService.restoreAlbum(req.params.id, req.user.userId);
@@ -132,6 +141,7 @@ export default {
   createAlbum,
   updateAlbum,
   archiveAlbum,
+  draftAlbum,
   restoreAlbum,
   deleteAlbum,
   setAccessEnabled,
