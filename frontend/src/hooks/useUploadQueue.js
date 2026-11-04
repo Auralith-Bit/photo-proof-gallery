@@ -41,6 +41,10 @@ export function useUploadQueue() {
       queryClient.invalidateQueries({ queryKey: ["photos", albumId] });
       queryClient.invalidateQueries({ queryKey: ["album", albumId] });
       queryClient.invalidateQueries({ queryKey: ["albums"] });
+      // Uploads change app-wide numbers: storage usage + recent activity feeds.
+      queryClient.invalidateQueries({ queryKey: ["storage"] });
+      queryClient.invalidateQueries({ queryKey: ["activity"] });
+      queryClient.invalidateQueries({ queryKey: ["analytics"] });
     },
     [queryClient]
   );

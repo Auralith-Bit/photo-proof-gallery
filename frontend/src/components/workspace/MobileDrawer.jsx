@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { Aperture, X } from "lucide-react";
 import { useUiStore } from "../../stores/uiStore";
 import { NavList } from "./Sidebar";
@@ -18,8 +19,14 @@ export default function MobileDrawer() {
       <div className="absolute inset-y-0 left-0 flex w-64 flex-col bg-charcoal">
         <div className="flex h-14 shrink-0 items-center justify-between border-b border-white/10 px-4">
           <span className="flex items-center gap-2">
-            <Aperture size={20} aria-hidden="true" className="text-gold" />
-            <span className="font-serif text-lg text-white">Frameora</span>
+            <Link
+              to="/dashboard"
+              aria-label="Frameora — go to dashboard"
+              className="flex items-center gap-2 rounded-control text-white/60 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-olive/70"
+            >
+              <Aperture size={20} aria-hidden="true" className="text-gold" />
+              <span className="font-serif text-lg text-white">Frameora</span>
+            </Link>
           </span>
           <button
             type="button"

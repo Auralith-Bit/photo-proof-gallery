@@ -90,7 +90,7 @@ export default function DashboardPage() {
     .slice(0, 6);
 
   const loading = albumsQuery.isLoading;
-  const firstName = user?.name?.split(" ")[0];
+  const fullName = user?.name?.trim();
   const storagePercent = storageQuery.data?.totalBytes
     ? Math.round((storageQuery.data.usedBytes / storageQuery.data.totalBytes) * 100)
     : 0;
@@ -101,7 +101,7 @@ export default function DashboardPage() {
         <div>
           <h1 className="text-[28px] font-semibold leading-9 text-charcoal">
             {getGreeting()}
-            {firstName ? `, ${firstName}` : ""}
+            {fullName ? `, ${fullName}` : ""}
           </h1>
           <p className="mt-1 text-sm text-charcoal/60">
             Here's what's happening across your studio.

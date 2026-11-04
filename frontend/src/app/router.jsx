@@ -29,7 +29,6 @@ import SettingsOverviewPage from "../features/settings/pages/SettingsOverviewPag
 import ProfileSettingsPage from "../features/settings/pages/ProfileSettingsPage";
 import SecuritySettingsPage from "../features/settings/pages/SecuritySettingsPage";
 import BrandingSettingsPage from "../features/settings/pages/BrandingSettingsPage";
-import PreferencesSettingsPage from "../features/settings/pages/PreferencesSettingsPage";
 import AlbumPasswordPage from "../features/client-access/pages/AlbumPasswordPage";
 import ClientGalleryPage from "../features/client-access/pages/ClientGalleryPage";
 
@@ -68,7 +67,6 @@ const router = createBrowserRouter([
           { path: "profile", element: <ProfileSettingsPage /> },
           { path: "security", element: <SecuritySettingsPage /> },
           { path: "branding", element: <BrandingSettingsPage /> },
-          { path: "preferences", element: <PreferencesSettingsPage /> },
         ],
       },
     ],

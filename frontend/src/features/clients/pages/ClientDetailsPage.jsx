@@ -65,7 +65,7 @@ function AssociatedAlbums({ albums, clientId, onAdd }) {
           <p className="mt-1 text-sm text-charcoal/60">Create an album and assign it to this client.</p>
         </div>
         <Button onClick={onAdd}>
-          <Plus size={16} aria-hidden="true" /> Add Album
+          <Plus size={16} aria-hidden="true" /> Create Album
         </Button>
       </Card>
     );

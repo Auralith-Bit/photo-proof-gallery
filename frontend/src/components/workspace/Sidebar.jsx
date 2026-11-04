@@ -1,4 +1,4 @@
-import { NavLink } from "react-router-dom";
+import { Link, NavLink } from "react-router-dom";
 import { Aperture } from "lucide-react";
 import { useUiStore } from "../../stores/uiStore";
 import { workspaceNav } from "./navigation";
@@ -57,15 +57,17 @@ export default function Sidebar() {
         collapsed ? "w-[76px]" : "w-60"
       )}
     >
-      <div
+      <Link
+        to="/dashboard"
+        aria-label="Frameora — go to dashboard"
         className={cn(
-          "flex h-16 shrink-0 items-center border-b border-white/10",
+          "flex h-16 shrink-0 items-center rounded-card text-white/60 transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-olive/70",
           collapsed ? "justify-center" : "gap-2.5 px-5"
         )}
       >
         <Aperture size={22} aria-hidden="true" className="text-gold" />
         {!collapsed && <span className="font-serif text-lg text-white">Frameora</span>}
-      </div>
+      </Link>
 
       <div className="flex-1 overflow-y-auto py-4">
         <NavList collapsed={collapsed} />

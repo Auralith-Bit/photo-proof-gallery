@@ -15,7 +15,6 @@ const labels = {
   profile: "Profile",
   security: "Security",
   branding: "Studio Branding",
-  preferences: "Preferences",
 };
 
 export default function Breadcrumbs() {

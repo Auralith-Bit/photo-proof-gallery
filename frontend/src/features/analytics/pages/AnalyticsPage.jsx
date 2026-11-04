@@ -1,8 +1,6 @@
 import { useMemo, useState } from "react";
 import {
   Activity,
-  Download,
-  Eye,
   HardDrive,
   Images,
   Info,
@@ -17,7 +15,6 @@ import AnalyticsFilterBar from "../../../components/analytics/AnalyticsFilterBar
 import ChartCard from "../../../components/analytics/ChartCard";
 import AlbumsCreatedChart from "../../../components/analytics/AlbumsCreatedChart";
 import UploadActivityChart from "../../../components/analytics/UploadActivityChart";
-import NotTrackedPanel from "../../../components/analytics/NotTrackedPanel";
 import { useAnalytics } from "../../../hooks/useAnalytics";
 import { useAlbums } from "../../../hooks/useAlbums";
 import { useStorage } from "../../../hooks/useStorage";
@@ -171,28 +168,6 @@ export default function AnalyticsPage() {
           </ChartCard>
         </div>
       )}
-
-      {/* Capabilities that need backend telemetry/snapshots — shown honestly, never faked. */}
-      <section aria-label="Unavailable metrics" className="flex flex-col gap-3">
-        <h2 className="text-lg font-semibold text-charcoal">Not tracked in this build</h2>
-        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-          <NotTrackedPanel
-            icon={Eye}
-            title="Gallery visits"
-            description="Client gallery view counts require server-side access logging, which is not part of this frontend build."
-          />
-          <NotTrackedPanel
-            icon={Download}
-            title="Photo downloads"
-            description="Download events require backend instrumentation on the client gallery delivery path."
-          />
-          <NotTrackedPanel
-            icon={HardDrive}
-            title="Storage usage over time"
-            description="Historical storage curves require periodic backend snapshots; only the current snapshot is available."
-          />
-        </div>
-      </section>
     </div>
   );
 }

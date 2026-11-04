@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
-import { CreditCard, HardDrive, Palette, Settings2, ShieldCheck, User } from "lucide-react";
+import { HardDrive, Palette, Settings2, ShieldCheck, User } from "lucide-react";
 import ConfirmDialog from "../ui/ConfirmDialog";
 import { useSettingsDirtyStore } from "../../stores/settingsDirtyStore";
 import { SettingsNavContext } from "../../features/settings/settingsNavContext";
@@ -11,7 +11,6 @@ const sections = [
   { to: "/settings/profile", label: "Profile", icon: User },
   { to: "/settings/security", label: "Security", icon: ShieldCheck },
   { to: "/settings/branding", label: "Studio Branding", icon: Palette },
-  { to: "/settings/preferences", label: "Preferences", icon: CreditCard },
 ];
 
 export default function SettingsLayout() {

@@ -95,31 +95,33 @@ export default function UploadManagerPage() {
         </EmptyState>
       ) : (
         <>
-          <div className="flex flex-wrap items-end gap-3">
-            <div className="w-full sm:w-80">
-              <Select
-                label="Upload into album"
-                value={albumValue}
-                onChange={handleSelectChange}
-                disabled={batchActive}
-                helperText={
-                  batchActive
-                    ? "Locked while uploads are in progress."
-                    : "Archived albums can't receive uploads."
-                }
-              >
-                <option value="">Select an album…</option>
-                {selectableAlbums.map((album) => (
-                  <option key={album.id} value={album.id}>
-                    {album.title}
-                  </option>
-                ))}
-              </Select>
-            </div>
+          <div className="flex flex-col gap-1.5">
+            <div className="flex flex-wrap items-end gap-3">
+              <div className="w-full sm:w-80">
+                <Select
+                  label="Upload into album"
+                  value={albumValue}
+                  onChange={handleSelectChange}
+                  disabled={batchActive}
+                >
+                  <option value="">Select an album…</option>
+                  {selectableAlbums.map((album) => (
+                    <option key={album.id} value={album.id}>
+                      {album.title}
+                    </option>
+                  ))}
+                </Select>
+              </div>
 
-            <Button variant="secondary" disabled={!canUpload} onClick={() => dropzoneRef.current?.open()}>
-              <Plus size={16} aria-hidden="true" /> Select Files
-            </Button>
+              <Button variant="secondary" disabled={!canUpload} onClick={() => dropzoneRef.current?.open()}>
+                <Plus size={16} aria-hidden="true" /> Select Files
+              </Button>
+            </div>
+            <p className="text-[13px] text-charcoal/60" aria-live="polite">
+              {batchActive
+                ? "Album selection is locked while uploads are in progress."
+                : "Archived albums can't receive uploads."}
+            </p>
           </div>
 
           {!albumValue && (

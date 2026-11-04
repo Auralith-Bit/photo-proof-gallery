@@ -113,8 +113,7 @@ function SecurityBody({ security }) {
     notifyOnClientAccess: security.notifyOnClientAccess,
   });
   const localDirty =
-    prefs.notifyOnNewDevice !== security.notifyOnNewDevice ||
-    prefs.notifyOnClientAccess !== security.notifyOnClientAccess;
+    prefs.notifyOnNewDevice !== security.notifyOnNewDevice;
 
   useEffect(() => setDirty(localDirty || updatePrefs.isPending), [localDirty, updatePrefs.isPending, setDirty]);
   useEffect(() => () => setDirty(false), [setDirty]);
@@ -173,13 +172,6 @@ function SecurityBody({ security }) {
             <p className="text-[13px] text-charcoal/60">Receive an email when a new device accesses your account.</p>
           </div>
           <Switch checked={prefs.notifyOnNewDevice} label="New device alerts" onChange={(v) => setPrefs((p) => ({ ...p, notifyOnNewDevice: v }))} />
-        </div>
-        <div className="flex items-center justify-between gap-4">
-          <div>
-            <p className="text-sm font-medium text-charcoal">Alert me when a client opens a gallery</p>
-            <p className="text-[13px] text-charcoal/60">Get notified when a client first accesses a shared album.</p>
-          </div>
-          <Switch checked={prefs.notifyOnClientAccess} label="Client access alerts" onChange={(v) => setPrefs((p) => ({ ...p, notifyOnClientAccess: v }))} />
         </div>
         <SaveBar
           status={useSaveStatus(updatePrefs, localDirty)}

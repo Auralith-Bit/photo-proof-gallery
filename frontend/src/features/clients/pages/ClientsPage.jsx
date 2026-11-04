@@ -92,7 +92,7 @@ export default function ClientsPage() {
         <EmptyState
           icon={Users}
           title="No clients yet"
-          description="Organizing albums by client makes it easy to find every gallery for a given person or business. Clients don't need an account to view their albums — they only need the link and password."
+          description="Create a client to get started. You can add albums to clients later."
         >
           <Button onClick={() => navigate("/clients/new")}>
             <Plus size={16} aria-hidden="true" /> Add Client
@@ -132,7 +132,11 @@ export default function ClientsPage() {
                   {filtered.map((client) => {
                     const status = clientStatusMap[client.status] ?? clientStatusMap.active;
                     return (
-                      <tr key={client.id} className="hover:bg-ivory/50">
+                      <tr
+                        key={client.id}
+                        onClick={() => navigate(`/clients/${client.id}`)}
+                        className="cursor-pointer hover:bg-ivory/50"
+                      >
                         <td className="px-4 py-3">
                           <button
                             type="button"
@@ -176,7 +180,10 @@ export default function ClientsPage() {
                           )}
                         </td>
                         <td className="px-4 py-3 text-[13px] text-charcoal/60">{formatDate(client.createdAt)}</td>
-                        <td className="px-4 py-3 text-right">
+                        <td
+                          className="px-4 py-3 text-right"
+                          onClick={(e) => e.stopPropagation()}
+                        >
                           <div className="inline-flex">
                             <ClientActionsMenu
                               client={client}
@@ -198,7 +205,11 @@ export default function ClientsPage() {
             {filtered.map((client) => {
               const status = clientStatusMap[client.status] ?? clientStatusMap.active;
               return (
-                <Card key={client.id} className="flex flex-col gap-3">
+                <Card
+                  key={client.id}
+                  className="flex cursor-pointer flex-col gap-3"
+                  onClick={() => navigate(`/clients/${client.id}`)}
+                >
                   <div className="flex items-start justify-between gap-3">
                     <button
                       type="button"
@@ -218,11 +229,13 @@ export default function ClientsPage() {
                         </span>
                       </span>
                     </button>
-                    <ClientActionsMenu
-                      client={client}
-                      onOpen={() => navigate(`/clients/${client.id}`)}
-                      onEdit={() => navigate(`/clients/${client.id}?edit=1`)}
-                    />
+                    <div className="shrink-0" onClick={(e) => e.stopPropagation()}>
+                      <ClientActionsMenu
+                        client={client}
+                        onOpen={() => navigate(`/clients/${client.id}`)}
+                        onEdit={() => navigate(`/clients/${client.id}?edit=1`)}
+                      />
+                    </div>
                   </div>
                   <div className="flex flex-col gap-1 border-t border-sand pt-3 text-[13px] text-charcoal/70">
                     <span className="flex items-center gap-1.5"><Mail size={12} aria-hidden="true" />{client.email || "—"}</span>

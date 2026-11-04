@@ -1,4 +1,4 @@
-import { ArrowRight, CreditCard, HardDrive, Palette, ShieldCheck, User } from "lucide-react";
+import { ArrowRight, HardDrive, Palette, ShieldCheck, User } from "lucide-react";
 import Card from "../../../components/ui/Card";
 import StorageCard from "../../../components/workspace/StorageCard";
 import { useSettingsNav } from "../settingsNavContext";
@@ -8,7 +8,6 @@ const cards = [
   { to: "/settings/profile", title: "Profile", desc: "Your display name, email, and studio photo.", icon: User },
   { to: "/settings/security", title: "Security", desc: "Change your password and manage active sessions.", icon: ShieldCheck },
   { to: "/settings/branding", title: "Studio Branding", desc: "Control how your name and logo appear to clients.", icon: Palette },
-  { to: "/settings/preferences", title: "Preferences", desc: "Defaults for new albums, downloads, dates, and views.", icon: CreditCard },
 ];
 
 export default function SettingsOverviewPage() {
