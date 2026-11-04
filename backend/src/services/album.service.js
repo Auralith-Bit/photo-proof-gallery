@@ -238,6 +238,20 @@ const archiveAlbum = async (albumId, userId) => {
   return formatAlbumResponse(album);
 };
 
+const draftAlbum = async (albumId, userId) => {
+  const album = await Album.findOne(buildAlbumQuery(albumId));
+  if (!album) {
+    const error = new Error("Album not found");
+    error.statusCode = 404;
+    throw error;
+  }
+
+  album.status = "draft";
+  await album.save();
+  await album.populate("clientId", "fullName");
+  return formatAlbumResponse(album);
+};
+
 const restoreAlbum = async (albumId, userId) => {
   const album = await Album.findOne(buildAlbumQuery(albumId));
   if (!album) {
@@ -354,6 +368,7 @@ export default {
   createAlbum,
   updateAlbum,
   archiveAlbum,
+  draftAlbum,
   restoreAlbum,
   deleteAlbum,
   setAccessEnabled,

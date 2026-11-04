@@ -13,6 +13,8 @@ import { uploadSettingsImage } from "../../../services/settings.service";
 import SaveBar from "../../../components/settings/SaveBar";
 import BrandingPreview from "../../../components/settings/BrandingPreview";
 import { useBranding, useUpdateBranding } from "../../../hooks/useSettings";
+import { useAlbums } from "../../../hooks/useAlbums";
+import { usePhotos } from "../../../hooks/usePhotos";
 import { useSaveStatus } from "../../../hooks/useSaveStatus";
 import { useSettingsDirtyStore } from "../../../stores/settingsDirtyStore";
 
@@ -39,6 +41,15 @@ const logoStyles = [
 function BrandingForm({ branding }) {
   const update = useUpdateBranding();
   const setDirty = useSettingsDirtyStore((s) => s.setDirty);
+
+  // Real gallery data for the live preview: most recently updated active album.
+  const albumsQuery = useAlbums();
+  const latestAlbum = [...(albumsQuery.data ?? [])]
+    .filter((album) => album.status === "active")
+    .sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt))[0];
+  const photosQuery = usePhotos(latestAlbum?.id);
+  const previewPhotos = latestAlbum?.id ? photosQuery.data ?? [] : [];
+
   const {
     register,
     handleSubmit,
@@ -140,9 +151,19 @@ function BrandingForm({ branding }) {
               logoStyle={values.logoStyle}
               showFooter={values.showFooter}
               footerText={values.footerText}
+              photos={previewPhotos}
+              photoCount={latestAlbum?.photoCount ?? 0}
             />
             <p className="mt-2 text-[13px] text-charcoal/50">
-              This preview updates as you edit and reflects exactly what clients will see.
+              {latestAlbum
+                ? (
+                  <>
+                    Previewing with your latest gallery{" "}
+                    <span className="font-medium text-charcoal/70">“{latestAlbum.title}”</span>. This preview
+                    updates as you edit and as photos change.
+                  </>
+                )
+                : "This preview updates as you edit and reflects exactly what clients will see."}
             </p>
           </div>
         </div>
